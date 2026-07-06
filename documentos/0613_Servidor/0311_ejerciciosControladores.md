@@ -1,4 +1,4 @@
-# 3.6. Ejercicios
+# 3.1.1. Ejercicios
 
 En los ejercicios de esta parte, vamos a continuar con el sitio Web que empezamos para la gestión de **marcapersonalFP**. Primero, añadiremos los controladores y métodos asociados a cada ruta, y posteriormente también completaremos las vistas usando formularios y el sistema de plantillas _Blade_.
 

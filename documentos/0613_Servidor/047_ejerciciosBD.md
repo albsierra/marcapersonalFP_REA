@@ -106,3 +106,5 @@ En el caso de obtener un resultado diferente, habrá que investigar cuál es la 
 - [Currículos](./0472_BDCurriculo.md)
 - [Reconocimientos](./0473_BDReconocimiento.md)
 - [Actividades](./0474_BDActividad.md)
+- [Crear y modificar familias profesionales](./0475_crearModificarFamiliaProfesional.md)
+- [Manejo de ficheros en Base de datos](./0476_utilizarFicheros.md)

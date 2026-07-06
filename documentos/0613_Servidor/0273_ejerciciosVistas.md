@@ -1,4 +1,4 @@
-# 2.7 Ejercicios Vistas
+# 2.7.3 Ejercicios Vistas
 
 ## Crear las vistas asociadas a las rutas definidas
 

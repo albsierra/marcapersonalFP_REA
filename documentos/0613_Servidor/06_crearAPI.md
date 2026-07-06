@@ -1,4 +1,4 @@
-# Introducción
+# Introducción a API y REST
 
 En los anteriores capítulos, hemos visto cómo crear una aplicación web con Laravel, utilizando el patrón MVC, para permitir la  gestión de los datos utilizados en la web _marcapersonalfp.es_.
 

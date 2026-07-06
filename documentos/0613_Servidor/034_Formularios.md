@@ -1,4 +1,4 @@
-# 3.5. Formularios
+# 3.4. Formularios
 
 En esta sección vamos a repasar brevemente como crear un formulario usando etiquetas de _HTML_, los distintos elementos o inputs que podemos utilizar, además también veremos como conectar el envío de un formulario con un controlador, como protegernos de ataques _CSRF_ y algunas cuestiones más.
 

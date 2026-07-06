@@ -1,4 +1,4 @@
-# 3.4. Redirecciones
+# 3.3. Redirecciones
 
 Como respuesta a una petición, también podemos devolver una redirección. Esta opción será interesante cuando, por ejemplo, el usuario no esté logueado y lo queramos redirigir al formulario de _login_, o cuando se produzca un error en la validación de una petición y queramos redirigir a otra ruta.
 

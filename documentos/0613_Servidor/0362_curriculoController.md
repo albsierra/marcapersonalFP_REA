@@ -1,4 +1,4 @@
-# 3.6.1 Ejercicio Controlador CurriculoController
+# 3.6.2 Ejercicio Controlador CurriculoController
 
 ## Ejercicio 1 - Controlador
 

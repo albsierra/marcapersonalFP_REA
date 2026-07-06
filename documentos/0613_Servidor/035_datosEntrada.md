@@ -1,4 +1,4 @@
-# 5.1. Datos de entrada
+# 3.5. Datos de entrada
 
 _Laravel_ facilita el acceso a los datos de entrada del usuario a través de solo unos pocos métodos. No importa el tipo de petición que se haya realizado (`POST`, `GET`, `PUT`, `DELETE`), si los datos son de un formulario o si se han añadido a la query string, en todos los casos se obtendrán de la misma forma.
 

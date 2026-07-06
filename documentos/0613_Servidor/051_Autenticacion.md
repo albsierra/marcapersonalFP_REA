@@ -1,4 +1,4 @@
-# 5.2. Control de usuarios
+# 5.1. Control de usuarios
 
 _Laravel_ incluye una serie de métodos y clases que harán que la implementación del control de usuarios sea muy rápida y sencilla. De hecho, casi todo el trabajo ya está hecho, solo tendremos que indicar dónde queremos utilizarlo y algunos pequeños detalles de configuración.
 

@@ -1,10 +1,10 @@
-# 5.3. Ejercicios
+# 5.2. Ejercicios
 
 En los ejercicios de esta sección vamos a completar la gestión de proyectos, terminando el procesamiento de los formularios y añadiendo el sistema de autenticación de usuarios.
 
 ## Instalación de Breeze
 
-En este momento, deberíamos tener instalado el _**Starter Kit de Laravel Breeze**_, que incluye el sistema de autenticación de usuarios. En caso contrario, regresa al capítulo [Control de usuarios](./052_Autenticacion.md) y sigue las instrucciones para instalarlo.
+En este momento, deberíamos tener instalado el _**Starter Kit de Laravel Breeze**_, que incluye el sistema de autenticación de usuarios. En caso contrario, regresa al capítulo [Control de usuarios](./051_Autenticacion.md) y sigue las instrucciones para instalarlo.
 
 ## Migración de la tabla usuarios
 

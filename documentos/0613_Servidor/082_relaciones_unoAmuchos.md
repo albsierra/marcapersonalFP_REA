@@ -57,7 +57,7 @@ $ciclo = FamiliaProfesional::find(1)->ciclos()
 
 ## Definiendo la relación inversa
 
-La relación inversa de una relación `hasMany()` es la misma relación `belongsTo()` que cimos en el [capítulo anterior](./091_relaciones_unoAuno.md#definiendo-la-relación-inversa). Por ejemplo, vamos a definir la relación inversa del método `ciclos` que definimos anteriormente en el modelo `FamiliaProfesional`:
+La relación inversa de una relación `hasMany()` es la misma relación `belongsTo()` que cimos en el [capítulo anterior](./081_relaciones_unoAuno.md#definiendo-la-relación-inversa). Por ejemplo, vamos a definir la relación inversa del método `ciclos` que definimos anteriormente en el modelo `FamiliaProfesional`:
 
 ```php
 <?php

@@ -1,4 +1,4 @@
-# 3.6.1 Ejercicio Controlador ReconocimientoController
+# 3.6.3 Ejercicio Controlador ReconocimientoController
 
 ## Ejercicio 1 - Controlador
 

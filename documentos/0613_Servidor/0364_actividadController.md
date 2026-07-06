@@ -1,4 +1,4 @@
-# 3.6.1 Ejercicio Controlador ActividadController
+# 3.6.4 Ejercicio Controlador ActividadController
 
 ## Ejercicio 1 - Controlador
 

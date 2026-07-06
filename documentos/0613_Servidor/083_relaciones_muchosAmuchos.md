@@ -133,7 +133,7 @@ return $this->belongsToMany(Idioma::class)->withTimestamps();
 
 ## Ejemplo
 
-En el [capítulo dedicado a las relaciones Uno a Uno](./091_relaciones_unoAuno.md#ejemplo), hemos visto un ejemplo de relación Uno a Uno en el que asociábamos el `Curriculo` a cada `User`. En esta ocasión, vamos a ver un ejemplo de relación Muchos a Muchos en el que asociaremos los recursos `Idioma` asociados a cada `User`.
+En el [capítulo dedicado a las relaciones Uno a Uno](./081_relaciones_unoAuno.md#ejemplo), hemos visto un ejemplo de relación Uno a Uno en el que asociábamos el `Curriculo` a cada `User`. En esta ocasión, vamos a ver un ejemplo de relación Muchos a Muchos en el que asociaremos los recursos `Idioma` asociados a cada `User`.
 
 Para ello, en el modelo `User` definiremos el método `idiomas()` que devolverá el resultado del método `belongsToMany()`:
 

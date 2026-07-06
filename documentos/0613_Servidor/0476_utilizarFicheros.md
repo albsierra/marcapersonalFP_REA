@@ -1,4 +1,4 @@
-# Manejo de ficheros
+# 4.7.6. Manejo de ficheros
 
 _Laravel_ facilita el manejo de ficheros, tanto si se van a almacenar en el **sistema de ficheros local**, como si se van a almacenar en un servicio como _**Amazon S3**_.
 

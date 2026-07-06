@@ -1,4 +1,4 @@
-# 3.3. Rutas avanzadas
+# 2.5. Rutas avanzadas
 
 _Laravel_ permite crear grupos de rutas para especificar opciones comunes a todas ellas, como por ejemplo un middleware, un prefijo, un subdominio o un espacio de nombres que se tiene que aplicar sobre todas ellas.
 
