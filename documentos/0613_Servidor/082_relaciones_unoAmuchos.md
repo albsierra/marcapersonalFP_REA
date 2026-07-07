@@ -1,4 +1,4 @@
-# Relaciones Uno a Muchos
+# 8.2. Relaciones Uno a Muchos
 
 Una relación **uno a muchos** se utiliza para definir relaciones donde un solo modelo es el padre de uno o más modelos hijo. Por ejemplo, una `familia_profesional` puede tener una gran cantidad de `ciclos`. Como todas las demás relaciones _Eloquent_, las relaciones **uno a muchos** se definen definiendo un método en su modelo _Eloquent_:
 

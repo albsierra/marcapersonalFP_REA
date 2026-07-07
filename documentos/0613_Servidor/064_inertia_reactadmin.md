@@ -1,4 +1,4 @@
-# De Blade a React
+# 6.4. De Blade a React
 En los capítulos anteriores, hemos:
 
 - utilizado el gestor de plantillas _Blade_ para visualizar las vistas de nuestra página web,

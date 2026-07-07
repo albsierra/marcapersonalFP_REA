@@ -1,4 +1,4 @@
-# Controlador de recursos API para los recursos `ciclos`
+# 7.1. Controlador de recursos API para los recursos `ciclos`
 
 ## Creación del Modelo
 

@@ -1,4 +1,4 @@
-# Controladores de Recursos
+# 7. Controladores de Recursos
 
 ## 1. Introducción
 

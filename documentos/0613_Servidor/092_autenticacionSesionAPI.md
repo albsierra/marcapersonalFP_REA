@@ -1,4 +1,4 @@
-# Autenticación con Sesiones en API
+# 9.2. Autenticación con Sesiones en API
 
 Aunque la norma general es utilizar la autenticación por tokens en las API, en ocasiones, puede ser necesario utilizar la autenticación por sesiones. Por ejemplo, si queremos utilizar la API desde una aplicación web, que ya utiliza la autenticación por sesiones.
 

@@ -1,4 +1,4 @@
-# Relaciones Uno a Uno
+# 8.1. Relaciones Uno a Uno
 
 Una relación **Uno a Uno** es un tipo de relación muy básica. Por ejemplo, un modelo `User` podría estar asociado con un modelo `Curriculo`. Para definir esta relación, colocaremos un método `curriculo()` en el modelo `User`. El método `curriculo()` debe llamar al método `hasOne()` y devolver su resultado. El método `hasOne()` está disponible para su modelo a través de la clase base `Illuminate\Database\Eloquent\Model` del modelo:
 

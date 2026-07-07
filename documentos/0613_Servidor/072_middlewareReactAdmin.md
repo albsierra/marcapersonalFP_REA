@@ -1,4 +1,4 @@
-# Middleware para adaptarnos al cliente.
+# 7.2. Middleware para adaptarnos al cliente.
 
 Si nos fijamos en la imagen, la API devuelve una respuesta completa, utilizando [HATEOAS](https://es.wikipedia.org/wiki/HATEOAS) (Hypermedia as the Engine of Application State).
 

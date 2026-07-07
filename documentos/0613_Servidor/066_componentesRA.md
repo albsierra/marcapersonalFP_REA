@@ -1,4 +1,4 @@
-# React-admin `<Resource />`
+# 6.6. React-admin `<Resource />`
 
 Los componentes `<Resource>` definen las rutas _CRUD_ de una aplicación _react-admin_.
 

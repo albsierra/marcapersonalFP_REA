@@ -1,4 +1,4 @@
-# Autorización
+# 10. Autorización
 
 Hasta ahora, hemos visto que las rutas las protegíamos para impedir que usuarios no autenticados pudieran alcanzarlas.
 

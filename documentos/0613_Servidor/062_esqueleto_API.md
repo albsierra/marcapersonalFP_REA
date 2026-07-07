@@ -1,4 +1,4 @@
-# Breeze API
+# 6.2. Breeze API
 
 En el capítulo dedicado a la [autenticación](./051_Autenticacion.md) ya instalamos el paquete [`laravel/breeze`](https://laravel.com/docs/starter-kits#laravel-breeze), que nos facilitó la gestión de usuarios.
 

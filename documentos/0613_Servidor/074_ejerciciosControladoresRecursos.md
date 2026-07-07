@@ -1,4 +1,4 @@
-# Ejercicios de controladores de recursos
+# 7.4. Ejercicios de controladores de recursos
 
 Se nos ha solicitado incrementar la cantidad de tipos de recursos que debemos manejar. Por ello, debemos realizar todo lo necesario para que nuestra API responda a todas las peticiones posibles de los recursos asociados a las tablas del esquema relacional de MarcaPersonalFP, que se relacionan a continuación:
 

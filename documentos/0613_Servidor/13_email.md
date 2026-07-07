@@ -1,4 +1,4 @@
-# Enviando correo electrónico
+# 13. Enviando correo electrónico
 
 ## Objetivo
 

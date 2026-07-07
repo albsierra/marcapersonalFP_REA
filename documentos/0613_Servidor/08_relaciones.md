@@ -1,4 +1,4 @@
-# Relaciones
+# 8. Relaciones
 
 A menudo, una tabla de la base de datos está relacionadas con alguna otra tabla. Por ejemplo, un `curriculo` está relacionado con un `user`.
 

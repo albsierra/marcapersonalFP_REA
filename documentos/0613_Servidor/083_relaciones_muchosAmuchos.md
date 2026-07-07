@@ -1,4 +1,4 @@
-# Relaciones muchos a muchos
+# 8.3. Relaciones muchos a muchos
 
 Las relaciones **muchos a muchos** son ligeramente más complicadas que las relaciones `hasOne` y `hasMany`. Un ejemplo de una relación **muchos a muchos** es un `user` que habla muchos `idiomas` y esos `idiomas` también son hablados por otros `users` en la aplicación. Por ejemplo, un `user` puede tener asignado el `idioma` de `Inglés` y `Francés`; sin embargo, esos `idiomas` también pueden ser asignados a otros `users` también. Entonces, un `user` habla muchos `idiomas` y un `idioma` tiene muchos `users`.
 

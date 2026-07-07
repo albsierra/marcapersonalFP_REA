@@ -1,4 +1,4 @@
-# `Gates`
+# 10.1. `Gates`
 
 Tan solo como un ejemplo, mostraremos cómo podemos autorizar la modificación de un `curriculo` en el caso de que el usuario autenticado sea el asociado a dicho `curriculo`:
 

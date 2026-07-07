@@ -1,4 +1,4 @@
-# Desarrollo colaborativo con GitHub
+# 2.1.1. Desarrollo colaborativo con GitHub
 
 Para poder trabajar colaborativamente y tener actualizado el código con las aportaciones de otros colaboradores, uno de los miembros del equipo debe crear el repositorio base en su cuenta de GitHub, con el código inicial de la aplicación.
 

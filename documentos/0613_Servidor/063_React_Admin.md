@@ -1,4 +1,4 @@
-# React-admin
+# 6.3. React-admin
 
 > Utiliza las secciones relacionadas con _React-Admin_ únicamente si no vas a utilizar ningún otro framework de cliente.
 

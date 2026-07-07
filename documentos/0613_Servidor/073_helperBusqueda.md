@@ -1,4 +1,4 @@
-# Utilizar el cuadro de búsqueda
+# 7.3. Utilizar el cuadro de búsqueda
 
 ## Filtrando a través de las búsquedas
 
