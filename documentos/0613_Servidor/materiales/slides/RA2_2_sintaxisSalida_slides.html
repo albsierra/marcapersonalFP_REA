@@ -1,0 +1,577 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>2.2. Sintaxis, sentencias y salida (echo/print) · marcapersonalFP v0</title>
+
+  <!--
+    reveal.js 6.0.2 cargado desde CDN con la versión fijada.
+
+    IMPORTANTE (cambio de la v5 a la v6): ya no existe la carpeta plugin/ en la raíz
+    del paquete. Todo cuelga de dist/:
+        dist/reveal.js · dist/reveal.css · dist/reset.css · dist/theme/*.css
+        dist/plugin/notes.js · dist/plugin/highlight.js · dist/plugin/highlight/monokai.css
+
+    Para trabajar SIN Internet: descarga el paquete (npm pack reveal.js@6.0.2),
+    copia su carpeta dist/ junto a este fichero y sustituye
+    "https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/" por "./reveal.js/".
+  -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/reveal.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/theme/black.css">
+  <!-- Tema del código resaltado -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/plugin/highlight/monokai.css">
+
+  <style>
+    /* ═══════════ Estilo base: el de tus presentaciones anteriores ═══════════ */
+    .reveal section img { background:none; border:none; box-shadow:none; }
+    .reveal h1, .reveal h2, .reveal h3 { color: #13DAEC; }
+    .reveal ul { list-style-type: none; }
+    .reveal ul li { margin: 10px 0; }
+    .small-text { font-size: 0.7em; }
+
+    /* Tooltips: mismo mecanismo que en las otras presentaciones.
+       Las clases .file-type / .access-type / .db-type eran idénticas y aquí se unifican en .has-tip */
+    .has-tip {
+      cursor: pointer;
+      position: relative;
+      display: inline-block;
+      padding: 5px;
+      margin: 5px 0;
+    }
+    .has-tip:hover { color: #13DAEC; }
+
+    .tooltip {
+      visibility: hidden;
+      position: absolute;
+      z-index: 1;
+      width: 400px;
+      background-color: rgba(0,0,0,0.9);
+      color: #fff;
+      text-align: left;
+      border-radius: 6px;
+      padding: 10px;
+      font-size: 0.6em;
+      font-weight: normal;
+      left: 90%;
+      top: 50%;
+      transform: translateY(-50%);
+      border: 1px solid rgba(19,218,236,0.45);   /* añadido: sobre fondo oscuro, sin borde casi no se distingue */
+    }
+    .has-tip:hover .tooltip { visibility: visible; }
+    .tooltip::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      right: 100%;
+      margin-top: -5px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: transparent rgba(0,0,0,0.9) transparent transparent;
+    }
+
+    /* Logo del centro */
+    .bg-logo {
+      position: fixed;
+      top: 10px;
+      right: 100px;
+      width: 100px;
+      height: 100px;
+      z-index: 1000;
+    }
+    /* El <text> del SVG no define fill (negro por defecto) y sobre fondo oscuro no se veía */
+    .bg-logo svg text { fill: #fff; }
+
+
+    /* ═══════════ Añadidos para esta presentación ═══════════ */
+    .muted { color: #9aa7ad; }
+
+    /* Portada */
+    .reveal h1.titulo { font-size: 1.9em; margin: 0.35em 0 0.3em; }
+
+    /* Columnas y paneles con filo de color (el color indica quién es quién) */
+    .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; text-align: left; align-items: start; }
+    .cols > * { min-width: 0; }
+    .panel { border-left: 4px solid #13DAEC; padding: 2px 0 2px 22px; }
+    .panel h3 { font-size: 0.95em; margin: 0 0 10px; }
+    .panel p { margin: 8px 0; }
+    .panel ul { margin: 0; display: block; }
+    .panel.nginx { border-color: #10B981; }   /* mismos colores que en los diagramas */
+    .panel.fpm   { border-color: #8B5CF6; }
+    .panel.client{ border-color: #3B82F6; }
+
+    /* Diagramas SVG del repositorio (llevan su propio fondo claro) */
+    .reveal img.flow { display: block; width: 880px; max-width: 100%; height: auto; margin: 6px auto 14px; }
+
+    /* Idea clave */
+    .statement { font-size: 1.3em; line-height: 1.3; text-align: left; border-left: 6px solid #13DAEC; padding: 6px 0 6px 30px; margin: 0 30px; }
+
+    /* Código */
+    .reveal :not(pre) > code { background: rgba(255,255,255,0.09); border-radius: 4px; padding: 0 0.2em; }
+    .reveal code.nw { white-space: nowrap; }          /* símbolos cortos (?>) que no deben partirse entre líneas */
+    .reveal pre { width: 100%; }
+    .reveal pre.mediano  { font-size: 0.62em; }
+    .reveal pre.compacto { font-size: 0.5em; }        /* líneas de ~70 caracteres */
+    .reveal pre.ancho    { font-size: 0.45em; }       /* línea de 75 caracteres + numeración */
+    .label { font-size: 0.6em; margin: 14px 0 6px; text-align: left; }
+
+    /* Teclas */
+    .reveal kbd {
+      font-family: var(--r-code-font); font-size: 0.8em;
+      background: #2b2b2b; border: 1px solid #555; border-bottom-width: 3px;
+      border-radius: 6px; padding: 0 0.4em;
+    }
+
+    /* Listas: ancho acotado para que el texto no llegue hasta el logo */
+    .reveal ul, .reveal ol.pasos { max-width: 860px; }
+    .reveal ol.pasos { margin: 0; display: block; text-align: left; padding-left: 1.3em; }
+    .reveal ol.pasos li { margin: 14px 0; }
+    .reveal ol.pasos.compacta { font-size: 0.88em; }
+    .cols.una { grid-template-columns: 1fr; gap: 14px; }
+
+    /* ── Solo en 2.2 ── */
+    .reveal pre { width: 92%; }                       /* un poco más estrecho: en ventanas 16:9 pequeñas el logo se mete en el margen */
+    .cols pre { width: 100%; }                        /* dentro de una columna, a todo el ancho de la columna */
+    .reveal pre.medio { font-size: 0.56em; }          /* código de ~55-60 caracteres por línea */
+
+    /* El párrafo que sigue al título no llega hasta la zona del logo */
+    .reveal section > h2 + p { max-width: 800px; margin-left: auto; margin-right: auto; }
+
+    /* Tabla comparativa echo / print */
+    .reveal table { margin: 0 auto; font-size: 0.72em; border-collapse: separate; border-spacing: 0; }   /* separate: las rayas de cada fila aparecen con su fragmento */
+    .reveal table th, .reveal table td { padding: 0.5em 0.9em; border-bottom: 1px solid rgba(255,255,255,0.22); vertical-align: top; }
+    .reveal table thead th { color: #13DAEC; font-size: 1.1em; border-bottom: 2px solid #13DAEC; }
+    .reveal table tbody th { color: #9aa7ad; white-space: nowrap; }
+
+    /* Ventana de navegador: mismo lenguaje visual que los diagramas del REA (panel claro con tres puntos) */
+    .browser { background: #F8FAFC; color: #1f2937; border-radius: 14px; padding: 14px 26px 20px; margin: 10px auto 18px; max-width: 860px; text-align: left; }
+    .browser .bar { display: flex; gap: 7px; margin-bottom: 10px; }
+    .browser .bar i { display: block; width: 12px; height: 12px; border-radius: 50%; }
+    .browser .bar i:nth-child(1) { background: #EF4444; }
+    .browser .bar i:nth-child(2) { background: #F59E0B; }
+    .browser .bar i:nth-child(3) { background: #10B981; }
+    .browser p { margin: 0; color: #1f2937; font-size: 0.85em; }
+  </style>
+</head>
+<body>
+
+    <div class="bg-logo">
+      <svg
+         version="1.1"
+         id="svg18"
+         width="200"
+         height="200"
+         viewBox="0 0 200 200"
+         sodipodi:docname="c3_logo"
+         inkscape:version="1.2.2 (732a01da63, 2022-12-09, custom)"
+         xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+         xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+         xmlns="http://www.w3.org/2000/svg"
+         xmlns:svg="http://www.w3.org/2000/svg">
+        <defs
+           id="defs22" />
+        <sodipodi:namedview
+           id="namedview20"
+           pagecolor="#ffffff"
+           bordercolor="#666666"
+           borderopacity="1.0"
+           inkscape:showpageshadow="2"
+           inkscape:pageopacity="0.0"
+           inkscape:pagecheckerboard="0"
+           inkscape:deskcolor="#d1d1d1"
+           showgrid="false"
+           showguides="true"
+           inkscape:zoom="4.065"
+           inkscape:cx="114.88315"
+           inkscape:cy="100"
+           inkscape:window-width="1850"
+           inkscape:window-height="1016"
+           inkscape:window-x="363"
+           inkscape:window-y="1467"
+           inkscape:window-maximized="1"
+           inkscape:current-layer="g24">
+          <sodipodi:guide
+             position="115.44994,191"
+             orientation="0,-1"
+             id="guide1222"
+             inkscape:locked="false" />
+          <sodipodi:guide
+             position="23,159.16359"
+             orientation="1,0"
+             id="guide1243"
+             inkscape:locked="false" />
+          <sodipodi:guide
+             position="117.02658,36.55078"
+             orientation="0,-1"
+             id="guide1245"
+             inkscape:locked="false" />
+        </sodipodi:namedview>
+        <g
+           inkscape:groupmode="layer"
+           inkscape:label="Image"
+           id="g24">
+          <rect
+             style="opacity:1;fill:#000000;fill-opacity:0.99702;stroke:none;stroke-width:1;stroke-dasharray:none"
+             id="rect1299"
+             width="155"
+             height="155"
+             x="23"
+             y="9" />
+          <path
+             style="fill:none"
+             d="M 23.666667,163.33333 23,162.66667 V 85.833333 9 h 46.224972 46.224968 l -7.45639,7.506491 -7.45639,7.50649 15.46932,15.49351 L 131.4758,55 116,70.5 100.5242,86 116,101.5 131.4758,117 116.2379,132.26173 101,147.52346 v 0.96475 0.96476 l 7.22497,7.27351 L 115.44994,164 H 69.891639 24.333333 Z"
+             id="path345" />
+          <g
+             id="g1241"
+             style="mix-blend-mode:normal;fill:#ffffff;fill-opacity:1;stroke:none;opacity:1"
+             transform="translate(-0.14725,0.06445)">
+            <path
+               id="rect557"
+               style="opacity:0.4;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1.31377"
+               d="m 88.718423,-32.506196 -0.0014,65.687734 H 154.40616 V 10.554121 h -43.0617 l 0.001,-43.060317 z"
+               transform="rotate(45)" />
+            <path
+               id="path1118"
+               style="opacity:0.4;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1.31377"
+               d="m 117.17383,9.5917969 -16,16.0000001 30.44922,30.447265 -14.44922,14.449219 -16,16 16,15.999999 14.44922,14.44727 -30.44922,30.44922 16,16 46.44922,-46.44922 -30.44922,-30.447269 30.44922,-30.449219 z" />
+          </g>
+          <text
+             xml:space="preserve"
+             style="font-size:22.2045px;line-height:1.25;font-family:sans-serif;stroke-width:0.925188"
+             x="25.699196"
+             y="168.92"
+             id="text1355"
+             transform="scale(0.87462907,1.1433418)"><tspan
+               sodipodi:role="line"
+               id="tspan1353"
+               x="25.699196"
+               y="168.92"
+               style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:24.6717px;font-family:'URW Gothic';-inkscape-font-specification:'URW Gothic, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.925188">CIFP CARLOS III</tspan></text>
+        </g>
+      </svg>
+    </div>
+
+  <div class="reveal">
+    <div class="slides">
+
+      <!-- 1 · Portada -->
+      <section>
+        <p class="small-text muted">Desarrollo Web en Entorno Servidor · Bloque 2 · RA2</p>
+        <h1 class="titulo" style="font-size:1.6em">2.2. Sintaxis,<br>sentencias y salida</h1>
+        <p class="muted">Las directivas <code>echo</code> y <code>print</code></p>
+        <p class="small-text muted">Seguimos con <em>marcapersonalFP</em> v0 en PHP plano</p>
+        <aside class="notes">
+          Seguimos sobre el proyecto vanilla_php de 2.1. Hoy: qué es una sentencia, dos reglas de sintaxis
+          y las dos directivas de salida (echo y print). Tecla S: vista del ponente. Tecla O: vista general.
+        </aside>
+      </section>
+
+      <!-- 2 · Sentencias -->
+      <section>
+        <h2>Sentencias</h2>
+        <p class="small-text">La unidad básica de un script PHP: instrucciones que el servidor ejecuta <strong>una tras otra, en orden</strong>. Cada una <strong>termina en punto y coma</strong> (<code class="nw">;</code>).</p>
+        <pre class="mediano"><code class="language-php" data-trim data-line-numbers="|2|3">
+&lt;?php
+  $tituloCiclo = "Desarrollo de Aplicaciones Web";
+  echo $tituloCiclo;
+?&gt;
+        </code></pre>
+        <p class="small-text">Dos sentencias: una <strong>asignación</strong> y una de <strong>salida</strong>.</p>
+        <aside class="notes">
+          Primer clic: la línea 2 (asignación). Segundo clic: la línea 3 (salida).
+          $tituloCiclo se usa de forma intuitiva, como "un nombre que guarda un valor":
+          las variables, sus tipos y las constantes se ven en 2.3.
+        </aside>
+      </section>
+
+      <!-- 3 · Espacios y saltos de línea -->
+      <section>
+        <h2>Espacios y saltos de línea</h2>
+        <p class="small-text">No importan para el intérprete. Lo que sí importa es el <code class="nw">;</code> al final de cada sentencia.</p>
+        <div class="cols">
+          <div>
+            <p class="label muted">Cómodo de leer</p>
+            <pre class="compacto"><code class="language-php" data-trim>
+&lt;?php
+  $horas = 2000;
+  echo $horas;
+?&gt;
+            </code></pre>
+          </div>
+          <div>
+            <p class="label muted">Igual de válido</p>
+            <pre class="compacto"><code class="language-php" data-trim>
+&lt;?php $horas=2000;echo $horas; ?&gt;
+            </code></pre>
+          </div>
+        </div>
+        <p class="small-text muted">Los dos muestran <code>2000</code>. Formatea como prefieras; por legibilidad, seguiremos una indentación consistente.</p>
+        <aside class="notes">
+          El ejemplo de la versión "apretada" es una ilustración añadida a la presentación (no está en el REA).
+          Comprobado con PHP 8.3: las dos versiones imprimen 2000.
+        </aside>
+      </section>
+
+      <!-- 4 · Mayúsculas y minúsculas -->
+      <section>
+        <h2>Mayúsculas y minúsculas</h2>
+        <div class="cols una">
+          <div class="panel">
+            <h3>Variables</h3>
+            <p><strong>Sí</strong> distinguen: <code>$tituloCiclo</code> ≠ <code>$TituloCiclo</code></p>
+            <p class="small-text muted">Son dos variables distintas.</p>
+          </div>
+          <div class="panel fragment">
+            <h3>Palabras clave y funciones</h3>
+            <p><strong>No</strong> distinguen: <code>echo</code> = <code>Echo</code> = <code>ECHO</code></p>
+            <p class="small-text muted">Es la misma instrucción; por convención, siempre en minúscula.</p>
+          </div>
+        </div>
+        <p class="small-text muted fragment" style="margin-top:1.2em">Más adelante (Bloque 3), varias sentencias bajo una condición o un bucle se agrupan con llaves <code>{ }</code>. De momento: secuencias simples.</p>
+        <aside class="notes">
+          Comprobado con PHP 8.3: usar $TituloCiclo teniendo definida $tituloCiclo da "Warning: Undefined variable $TituloCiclo",
+          mientras que Echo y ECHO funcionan igual que echo.
+        </aside>
+      </section>
+
+      <!-- 5 · Efecto de las sentencias -->
+      <section>
+        <h2>Sentencias y efectos</h2>
+        <div class="cols">
+          <div class="panel">
+            <h3>Asignar</h3>
+            <p>Guarda un valor en una variable: <code class="nw">$horas = 2000;</code></p>
+            <p class="small-text muted">No genera salida visible; solo cambia el estado interno del script.</p>
+          </div>
+          <div class="panel fragment">
+            <h3>Emitir salida</h3>
+            <p>Envía texto a la respuesta HTTP: <code>echo</code>, <code>print</code></p>
+            <p class="small-text muted">Es la única forma de que algo calculado en el servidor llegue a verse en la página.</p>
+          </div>
+        </div>
+        <aside class="notes">
+          Los dos efectos con los que trabajaremos más a menudo en este bloque.
+          Enlaza con 2.1: la salida es lo que viaja en la respuesta HTTP hacia el navegador.
+        </aside>
+      </section>
+
+      <!-- 6 · Asignar no muestra nada -->
+      <section>
+        <h2>Asignar no muestra nada</h2>
+        <pre class="medio"><code class="language-php" data-trim data-line-numbers="|2|3">
+&lt;?php
+  $horas = 2000;      // asignación: sin efecto visible
+  echo $horas;        // salida: esto sí llega al navegador
+?&gt;
+        </code></pre>
+        <p class="small-text">Es fácil olvidarlo al empezar: para <strong>verlo</strong> en la página necesitas una sentencia de salida aparte.</p>
+        <aside class="notes">
+          Error típico de principiantes: escribir $horas = 2000; y esperar verlo en pantalla.
+        </aside>
+      </section>
+
+      <!-- 7 · echo y print: directivas del lenguaje -->
+      <section>
+        <h2><code>echo</code> y <code>print</code></h2>
+        <p class="statement" style="font-size:1.1em">No son funciones en sentido estricto:<br>son <strong>directivas del lenguaje</strong> (<em>language constructs</em>).</p>
+        <p class="small-text muted" style="margin-top:1.3em">A efectos prácticos las usamos igual: para enviar texto a la salida. Existen ligeras diferencias entre ellas.</p>
+      </section>
+
+      <!-- 8 · Tabla comparativa -->
+      <section>
+        <h2><code>echo</code> frente a <code>print</code></h2>
+        <table>
+          <thead>
+            <tr><th></th><th><code>echo</code></th><th><code>print</code></th></tr>
+          </thead>
+          <tbody>
+            <tr class="fragment"><th scope="row">Argumentos</th><td>Uno o <strong>varios</strong>, separados por comas</td><td>Solo <strong>uno</strong></td></tr>
+            <tr class="fragment"><th scope="row">Valor devuelto</th><td>Ninguno</td><td><code>1</code> (por eso puede usarse dentro de una expresión)</td></tr>
+            <tr class="fragment"><th scope="row">Paréntesis</th><td>Opcionales</td><td>Opcionales</td></tr>
+          </tbody>
+        </table>
+        <aside class="notes">
+          Matiz sobre los paréntesis (según el manual de PHP): con un solo argumento no dan error, pero los paréntesis forman
+          parte de la expresión, no de la sintaxis de echo. Con varios argumentos no se pueden envolver todos:
+          echo("a", "b"); es un Parse Error.
+        </aside>
+      </section>
+
+      <!-- 9 · echo con varios argumentos -->
+      <section>
+        <h2><code>echo</code> con comas</h2>
+        <pre class="compacto"><code class="language-php" data-trim data-line-numbers="|2-4|6-12">
+&lt;?php
+  $nombreCiclo = "Desarrollo de Aplicaciones Web";
+  $familia     = "Informática y Comunicaciones";
+  $horas       = 2000;
+
+  echo '&lt;p&gt;El ciclo &lt;strong&gt;',
+       $nombreCiclo,
+       '&lt;/strong&gt; pertenece a la familia de ',
+       $familia,
+       ' y tiene ',
+       $horas,
+       ' horas.&lt;/p&gt;';
+?&gt;
+        </code></pre>
+        <p class="small-text">Varios argumentos separados por comas: PHP emite las piezas <strong>una tras otra, sin nada entre medias</strong>.</p>
+        <p class="small-text muted">Repartido en líneas para leerlo mejor: los saltos de línea no importan.</p>
+        <aside class="notes">
+          En el REA la sentencia echo está en una sola línea; aquí se reparte en varias (mismo resultado, comprobado byte a byte)
+          y se apoya en la regla de que los saltos de línea no importan.
+          Como PHP no inserta nada entre las piezas, los espacios tienen que ir dentro de las cadenas.
+        </aside>
+      </section>
+
+      <!-- 10 · print y el operador . -->
+      <section>
+        <h2><code>print</code> y el operador <code>.</code></h2>
+        <p class="small-text"><code>print</code> acepta un <strong>único</strong> argumento: pegamos los trozos con el <strong>operador de concatenación</strong> (<code class="nw">.</code>).</p>
+        <pre class="medio"><code class="language-php" data-trim>
+&lt;?php
+  print '&lt;p&gt;El ciclo &lt;strong&gt;'
+      . $nombreCiclo
+      . '&lt;/strong&gt; pertenece a la familia de '
+      . $familia
+      . ' y tiene '
+      . $horas
+      . ' horas.&lt;/p&gt;';
+?&gt;
+        </code></pre>
+        <p class="small-text muted">Con las mismas tres variables de antes.</p>
+      </section>
+
+      <!-- 11 · Mismo HTML -->
+      <section>
+        <h2>El mismo HTML</h2>
+        <div class="browser">
+          <div class="bar"><i></i><i></i><i></i></div>
+          <p>El ciclo <strong>Desarrollo de Aplicaciones Web</strong> pertenece a la familia de Informática y Comunicaciones y tiene 2000 horas.</p>
+        </div>
+        <p class="small-text">Con <code>echo</code> o con <code>print</code>, el navegador recibe lo mismo. La elección es, casi siempre, cuestión de estilo.</p>
+        <p class="small-text muted">En este REA usaremos sobre todo <code>echo</code>: es la más habitual y admite varios argumentos sin concatenar.</p>
+        <aside class="notes">
+          Comprobado con PHP 8.3: las cuatro variantes (echo o print, en una línea o repartidas en varias) generan exactamente los mismos 139 bytes de HTML.
+        </aside>
+      </section>
+
+      <!-- 12 · Curiosidad -->
+      <section>
+        <p class="small-text muted">Curiosidad</p>
+        <h2><code>print</code> devuelve <code>1</code></h2>
+        <pre class="mediano"><code class="language-php" data-trim>
+&lt;?php
+  $resultado = print "Hola";
+?&gt;
+        </code></pre>
+        <ul class="small-text">
+          <li>Como <code>print</code> devuelve <code>1</code>, es la única de las dos que puede aparecer <strong>dentro de otra expresión</strong></li>
+          <li>No es un patrón que vayamos a usar: resulta confuso</li>
+          <li>Pero explica por qué el manual de PHP la describe como una expresión y <code>echo</code> no</li>
+        </ul>
+        <aside class="notes">
+          Es el ejercicio 3. Al ejecutar $resultado = print "Hola"; echo $resultado; se ve "Hola1":
+          print emite "Hola" y devuelve 1, que echo emite a continuación.
+          El manual lo ilustra con el operador ternario: ($x) ? print 'a' : print 'b'; es válido,
+          y ($x) ? echo 'a' : echo 'b'; no lo es.
+        </aside>
+      </section>
+
+      <!-- 13 · Lo esencial -->
+      <section>
+        <h2>Lo esencial</h2>
+        <ul>
+          <li>Un script es una <strong>secuencia de sentencias</strong>, cada una terminada en <code class="nw">;</code></li>
+          <li>Las <strong>variables</strong> distinguen mayúsculas; las <strong>palabras clave</strong>, no</li>
+          <li><strong>Asignar</strong> no muestra nada: solo la <strong>salida</strong> llega al navegador</li>
+          <li><code>echo</code>: varios argumentos con comas<br><code>print</code>: uno solo, con <code class="nw">.</code></li>
+        </ul>
+      </section>
+
+      <!-- 14 · Entorno -->
+      <section>
+        <h2>Seguimos en <code>vanilla_php</code></h2>
+        <p class="small-text">Mismo proyecto de la sección anterior. ¿No lo tienes levantado? Repasa <em>Preparación del entorno de trabajo</em> en 2.1 o, si partes de cero, <em>0. Instalación y preparación del entorno</em>.</p>
+        <pre class="medio"><code class="language-bash" data-trim>
+# desde la carpeta laradock/
+docker compose up -d nginx php-fpm
+        </code></pre>
+        <pre class="medio"><code class="language-plaintext" data-trim>
+vanilla_php/
+└── public/
+    ├── RA2_holaMundo.php          ← de 2.1
+    └── RA2_sintaxisSalida.php     ← el de esta sección
+        </code></pre>
+        <p class="small-text muted">Se abre en <code>http://localhost/RA2_sintaxisSalida.php</code></p>
+      </section>
+
+      <!-- 15 · Ejercicios 1-2 -->
+      <section>
+        <h2>Ejercicios (1/2)</h2>
+        <ol class="pasos compacta">
+          <li><strong>Ficha de ciclo con <code>echo</code>.</strong> Crea <code>RA2_sintaxisSalida.php</code> en <code>vanilla_php/public/</code> con las tres variables (<code>$nombreCiclo</code>, <code>$familia</code>, <code>$horas</code>) y la sentencia <code>echo</code> de esta sección. Ábrelo en el navegador y comprueba el resultado.</li>
+          <li><strong>La misma ficha con <code>print</code>.</strong> En el mismo fichero, debajo del <code>echo</code> anterior, añade un segundo párrafo con la sentencia <code>print</code> + concatenación que construye la misma frase. El resultado debe verse <strong>dos veces</strong> en la página, una por cada directiva.</li>
+        </ol>
+      </section>
+
+      <!-- 16 · Ejercicios 3-4 -->
+      <section>
+        <h2>Ejercicios (2/2)</h2>
+        <ol class="pasos compacta" start="3">
+          <li><strong><code>print</code> como expresión.</strong> Añade al final del fichero <code>$resultado = print "Hola";</code> seguido de <code>echo $resultado;</code>. Observa el resultado y anota, en un comentario, qué valor imprime <code>$resultado</code> y por qué. Después sustituye <code>print</code> por <code>echo</code> en esa línea y fíjate en el error que da PHP: ¿qué te dice sobre la diferencia entre ambas?</li>
+          <li><strong>Investiga.</strong> ¿Qué ventaja práctica citan las fuentes oficiales de PHP a favor de <code>echo</code> frente a <code>print</code>? Escribe la respuesta en un comentario del fichero.</li>
+        </ol>
+        <aside class="notes">
+          EJERCICIO 3. Se ve "Hola1". Con $resultado = echo "Hola"; PHP 8 da: Parse error: syntax error, unexpected token "echo".
+          Ojo: es un error de análisis, así que el fichero ENTERO deja de ejecutarse, no solo esa línea. Conviene que lo dejen
+          comentado o lo deshagan antes de pasar el test de los ejercicios 1 y 2.
+
+          EJERCICIO 4 (respuesta esperada). En la página de echo del manual, un recuadro "Tip" indica que pasar varios argumentos
+          a echo evita complicaciones con la precedencia del operador de concatenación (.), porque cada expresión es independiente
+          y no hacen falta paréntesis. Además, la página resume que las diferencias principales con print son que echo acepta
+          varios argumentos y no devuelve valor. El manual no habla de velocidad: si algún alumno cita "echo es marginalmente
+          más rápido", es una afirmación que circula por otras fuentes, no por esas páginas.
+        </aside>
+      </section>
+
+      <!-- 17 · Autocorrección -->
+      <section>
+        <h2>Comprueba tu solución (opcional)</h2>
+        <ol class="pasos">
+          <li>Copia <code>RA2_2_SintaxisSalidaTest.php</code> a <code>vanilla_php/tests/</code></li>
+          <li>Desde la carpeta <code>laradock/</code>, ejecuta ese test:</li>
+        </ol>
+        <pre class="compacto"><code class="language-bash" data-trim>
+docker compose exec --workdir /var/www/vanilla_php workspace \
+  vendor/bin/phpunit tests/RA2_2_SintaxisSalidaTest.php
+        </code></pre>
+        <p class="small-text">Cubre los ejercicios <strong>1 y 2</strong>.</p>
+        <p class="small-text">Si todo está bien: <code class="nw">OK (2 tests, 6 assertions)</code></p>
+      </section>
+
+      <!-- 18 · Siguiente -->
+      <section>
+        <p class="small-text muted">Siguiente</p>
+        <h2>2.3. Tipos de datos, variables y constantes, operadores</h2>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/reveal.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/plugin/notes.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/plugin/highlight.js"></script>
+  <script>
+    Reveal.initialize({
+      hash: true,
+      slideNumber: 'c/t',
+      transition: 'slide',
+      // Al exportar a PDF (añadir ?print-pdf a la URL): una página por diapositiva, con todos los fragmentos visibles
+      pdfSeparateFragments: false,
+      plugins: [ RevealHighlight, RevealNotes ]
+    });
+  </script>
+</body>
+</html>

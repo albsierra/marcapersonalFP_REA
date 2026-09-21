@@ -1,5 +1,7 @@
 # 2.2. Sintaxis, sentencias y salida (`echo`/`print`)
 
+**Presentación de apoyo** (_RevealJS_): [RA2_2_sintaxisSalida_slides.html](./materiales/slides/RA2_2_sintaxisSalida_slides.html)
+
 ## Sentencias: la unidad básica de un script PHP
 
 Un script PHP —lo que va dentro de `<?php ?>`— es una secuencia de **sentencias** (_statements_): instrucciones que el servidor ejecuta una tras otra, en orden. Cada sentencia **termina en punto y coma** (`;`):

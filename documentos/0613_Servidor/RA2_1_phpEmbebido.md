@@ -2,6 +2,8 @@
 
 > **Bloque 2 · Inserción de código en páginas web (RA2).** En este bloque construimos la **primera versión de _marcapersonalFP_ en PHP plano** (la llamaremos _v0_). Aquí no hay framework todavía: escribiremos PHP "a mano", embebido en HTML, para entender qué ocurre por debajo. Más adelante, en el Bloque 4, reconstruiremos lo mismo con _Laravel_ y comprobaremos que **el framework automatiza lo que aquí hacemos a mano**.
 
+**Presentación de apoyo** (_RevealJS_): [RA2_1_phpEmbebido_slides.html](./materiales/slides/RA2_1_phpEmbebido_slides.html)
+
 ## De la página estática a la página dinámica
 
 Hasta ahora, en otros módulos, habrás servido páginas **estáticas**: ficheros `.html` que el servidor web entrega tal cual, iguales para todos los visitantes. En el desarrollo _en entorno servidor_ generamos el HTML **dinámicamente**: el servidor **ejecuta código** en el momento de la petición y produce un HTML que puede cambiar según los datos, el usuario o el momento.
@@ -25,7 +27,7 @@ La técnica de embeber código en HTML no es exclusiva de un lenguaje. Las tecno
 - **PHP** — el lenguaje que usaremos en este módulo. Diseñado desde el principio para embeberse en HTML.
 - **ASP / ASP.NET** — tecnología de Microsoft.
 - **JSP** (_JavaServer Pages_) — sobre la plataforma Java.
-- **Python** — mediante servlets, WSGI o frameworks como Django/Flask.
+- **Python** — mediante interfaces como WSGI/ASGI y frameworks como Django o Flask.
 - **JavaScript (Node.js)** — en el lado servidor, normalmente con un framework como **Express**; el equivalente al "código embebido" son motores de plantillas como **EJS** (`<% %>`, muy similar a `<?php ?>`) o **Handlebars**.
 
 Todas comparten la misma idea (código que el servidor ejecuta para producir el marcado que verá el cliente); cambian la sintaxis y el ecosistema. Nosotros trabajaremos con **PHP** por ser el más extendido en la web y la base sobre la que se construye _Laravel_.

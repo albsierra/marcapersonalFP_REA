@@ -1,0 +1,579 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>2.1. PHP embebido en HTML · marcapersonalFP v0</title>
+
+  <!--
+    reveal.js 6.0.2 cargado desde CDN con la versión fijada.
+
+    IMPORTANTE (cambio de la v5 a la v6): ya no existe la carpeta plugin/ en la raíz
+    del paquete. Todo cuelga de dist/:
+        dist/reveal.js · dist/reveal.css · dist/reset.css · dist/theme/*.css
+        dist/plugin/notes.js · dist/plugin/highlight.js · dist/plugin/highlight/monokai.css
+
+    Para trabajar SIN Internet: descarga el paquete (npm pack reveal.js@6.0.2),
+    copia su carpeta dist/ junto a este fichero y sustituye
+    "https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/" por "./reveal.js/".
+  -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/reveal.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/theme/black.css">
+  <!-- Tema del código resaltado -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/plugin/highlight/monokai.css">
+
+  <style>
+    /* ═══════════ Estilo base: el de tus presentaciones anteriores ═══════════ */
+    .reveal section img { background:none; border:none; box-shadow:none; }
+    .reveal h1, .reveal h2, .reveal h3 { color: #13DAEC; }
+    .reveal ul { list-style-type: none; }
+    .reveal ul li { margin: 10px 0; }
+    .small-text { font-size: 0.7em; }
+
+    /* Tooltips: mismo mecanismo que en las otras presentaciones.
+       Las clases .file-type / .access-type / .db-type eran idénticas y aquí se unifican en .has-tip */
+    .has-tip {
+      cursor: pointer;
+      position: relative;
+      display: inline-block;
+      padding: 5px;
+      margin: 5px 0;
+    }
+    .has-tip:hover { color: #13DAEC; }
+
+    .tooltip {
+      visibility: hidden;
+      position: absolute;
+      z-index: 1;
+      width: 400px;
+      background-color: rgba(0,0,0,0.9);
+      color: #fff;
+      text-align: left;
+      border-radius: 6px;
+      padding: 10px;
+      font-size: 0.6em;
+      font-weight: normal;
+      left: 90%;
+      top: 50%;
+      transform: translateY(-50%);
+      border: 1px solid rgba(19,218,236,0.45);   /* añadido: sobre fondo oscuro, sin borde casi no se distingue */
+    }
+    .has-tip:hover .tooltip { visibility: visible; }
+    .tooltip::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      right: 100%;
+      margin-top: -5px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: transparent rgba(0,0,0,0.9) transparent transparent;
+    }
+
+    /* Logo del centro */
+    .bg-logo {
+      position: fixed;
+      top: 10px;
+      right: 100px;
+      width: 100px;
+      height: 100px;
+      z-index: 1000;
+    }
+    /* El <text> del SVG no define fill (negro por defecto) y sobre fondo oscuro no se veía */
+    .bg-logo svg text { fill: #fff; }
+
+
+    /* ═══════════ Añadidos para esta presentación ═══════════ */
+    .muted { color: #9aa7ad; }
+
+    /* Portada */
+    .reveal h1.titulo { font-size: 1.9em; margin: 0.35em 0 0.3em; }
+
+    /* Columnas y paneles con filo de color (el color indica quién es quién) */
+    .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; text-align: left; align-items: start; }
+    .cols > * { min-width: 0; }
+    .panel { border-left: 4px solid #13DAEC; padding: 2px 0 2px 22px; }
+    .panel h3 { font-size: 0.95em; margin: 0 0 10px; }
+    .panel p { margin: 8px 0; }
+    .panel ul { margin: 0; display: block; }
+    .panel.nginx { border-color: #10B981; }   /* mismos colores que en los diagramas */
+    .panel.fpm   { border-color: #8B5CF6; }
+    .panel.client{ border-color: #3B82F6; }
+
+    /* Diagramas SVG del repositorio (llevan su propio fondo claro) */
+    .reveal img.flow { display: block; width: 880px; max-width: 100%; height: auto; margin: 6px auto 14px; }
+
+    /* Idea clave */
+    .statement { font-size: 1.3em; line-height: 1.3; text-align: left; border-left: 6px solid #13DAEC; padding: 6px 0 6px 30px; margin: 0 30px; }
+
+    /* Código */
+    .reveal :not(pre) > code { background: rgba(255,255,255,0.09); border-radius: 4px; padding: 0 0.2em; }
+    .reveal code.nw { white-space: nowrap; }          /* símbolos cortos (?>) que no deben partirse entre líneas */
+    .reveal pre { width: 100%; }
+    .reveal pre.mediano  { font-size: 0.62em; }
+    .reveal pre.compacto { font-size: 0.5em; }        /* líneas de ~70 caracteres */
+    .reveal pre.ancho    { font-size: 0.45em; }       /* línea de 75 caracteres + numeración */
+    .label { font-size: 0.6em; margin: 14px 0 6px; text-align: left; }
+
+    /* Teclas */
+    .reveal kbd {
+      font-family: var(--r-code-font); font-size: 0.8em;
+      background: #2b2b2b; border: 1px solid #555; border-bottom-width: 3px;
+      border-radius: 6px; padding: 0 0.4em;
+    }
+
+    /* Listas: ancho acotado para que el texto no llegue hasta el logo */
+    .reveal ul, .reveal ol.pasos { max-width: 860px; }
+    .reveal ol.pasos { margin: 0; display: block; text-align: left; padding-left: 1.3em; }
+    .reveal ol.pasos li { margin: 14px 0; }
+    .reveal ol.pasos.compacta { font-size: 0.88em; }
+    .cols.una { grid-template-columns: 1fr; gap: 14px; }
+  </style>
+</head>
+<body>
+
+    <div class="bg-logo">
+      <svg
+         version="1.1"
+         id="svg18"
+         width="200"
+         height="200"
+         viewBox="0 0 200 200"
+         sodipodi:docname="c3_logo"
+         inkscape:version="1.2.2 (732a01da63, 2022-12-09, custom)"
+         xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+         xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+         xmlns="http://www.w3.org/2000/svg"
+         xmlns:svg="http://www.w3.org/2000/svg">
+        <defs
+           id="defs22" />
+        <sodipodi:namedview
+           id="namedview20"
+           pagecolor="#ffffff"
+           bordercolor="#666666"
+           borderopacity="1.0"
+           inkscape:showpageshadow="2"
+           inkscape:pageopacity="0.0"
+           inkscape:pagecheckerboard="0"
+           inkscape:deskcolor="#d1d1d1"
+           showgrid="false"
+           showguides="true"
+           inkscape:zoom="4.065"
+           inkscape:cx="114.88315"
+           inkscape:cy="100"
+           inkscape:window-width="1850"
+           inkscape:window-height="1016"
+           inkscape:window-x="363"
+           inkscape:window-y="1467"
+           inkscape:window-maximized="1"
+           inkscape:current-layer="g24">
+          <sodipodi:guide
+             position="115.44994,191"
+             orientation="0,-1"
+             id="guide1222"
+             inkscape:locked="false" />
+          <sodipodi:guide
+             position="23,159.16359"
+             orientation="1,0"
+             id="guide1243"
+             inkscape:locked="false" />
+          <sodipodi:guide
+             position="117.02658,36.55078"
+             orientation="0,-1"
+             id="guide1245"
+             inkscape:locked="false" />
+        </sodipodi:namedview>
+        <g
+           inkscape:groupmode="layer"
+           inkscape:label="Image"
+           id="g24">
+          <rect
+             style="opacity:1;fill:#000000;fill-opacity:0.99702;stroke:none;stroke-width:1;stroke-dasharray:none"
+             id="rect1299"
+             width="155"
+             height="155"
+             x="23"
+             y="9" />
+          <path
+             style="fill:none"
+             d="M 23.666667,163.33333 23,162.66667 V 85.833333 9 h 46.224972 46.224968 l -7.45639,7.506491 -7.45639,7.50649 15.46932,15.49351 L 131.4758,55 116,70.5 100.5242,86 116,101.5 131.4758,117 116.2379,132.26173 101,147.52346 v 0.96475 0.96476 l 7.22497,7.27351 L 115.44994,164 H 69.891639 24.333333 Z"
+             id="path345" />
+          <g
+             id="g1241"
+             style="mix-blend-mode:normal;fill:#ffffff;fill-opacity:1;stroke:none;opacity:1"
+             transform="translate(-0.14725,0.06445)">
+            <path
+               id="rect557"
+               style="opacity:0.4;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1.31377"
+               d="m 88.718423,-32.506196 -0.0014,65.687734 H 154.40616 V 10.554121 h -43.0617 l 0.001,-43.060317 z"
+               transform="rotate(45)" />
+            <path
+               id="path1118"
+               style="opacity:0.4;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1.31377"
+               d="m 117.17383,9.5917969 -16,16.0000001 30.44922,30.447265 -14.44922,14.449219 -16,16 16,15.999999 14.44922,14.44727 -30.44922,30.44922 16,16 46.44922,-46.44922 -30.44922,-30.447269 30.44922,-30.449219 z" />
+          </g>
+          <text
+             xml:space="preserve"
+             style="font-size:22.2045px;line-height:1.25;font-family:sans-serif;stroke-width:0.925188"
+             x="25.699196"
+             y="168.92"
+             id="text1355"
+             transform="scale(0.87462907,1.1433418)"><tspan
+               sodipodi:role="line"
+               id="tspan1353"
+               x="25.699196"
+               y="168.92"
+               style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:24.6717px;font-family:'URW Gothic';-inkscape-font-specification:'URW Gothic, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.925188">CIFP CARLOS III</tspan></text>
+        </g>
+      </svg>
+    </div>
+
+  <div class="reveal">
+    <div class="slides">
+
+      <!-- 1 · Portada -->
+      <section>
+        <p class="small-text muted">Desarrollo Web en Entorno Servidor · Bloque 2 · RA2</p>
+        <h1 class="titulo">2.1. PHP embebido<br>en HTML</h1>
+        <p class="muted">Inserción de código en páginas web</p>
+        <p class="small-text muted">Primera versión de <em>marcapersonalFP</em> en PHP plano (v0)</p>
+        <aside class="notes">
+          Objetivo de la sesión: entender qué ocurre "por debajo" antes de que Laravel lo automatice en el Bloque 4.
+          Tecla S: vista del ponente. Tecla O: vista general de todas las diapositivas.
+        </aside>
+      </section>
+
+      <!-- 2 · Dónde estamos -->
+      <section>
+        <h2>Dónde estamos</h2>
+        <div class="cols">
+          <div class="panel">
+            <h3>Bloque 2 · ahora</h3>
+            <p><em>marcapersonalFP</em> <strong>v0</strong> en <strong>PHP plano</strong>, embebido en HTML.</p>
+            <p class="small-text muted">Sin framework: escribimos PHP "a mano" para entender qué ocurre por debajo.</p>
+          </div>
+          <div class="panel fragment">
+            <h3>Bloque 4 · después</h3>
+            <p>La misma aplicación reconstruida con <strong>Laravel</strong>.</p>
+            <p class="small-text muted">Comprobaremos que el framework automatiza lo que aquí hacemos a mano.</p>
+          </div>
+        </div>
+        <aside class="notes">
+          "Vanilla" = PHP puro, tal cual lo procesa el intérprete, sin ningún framework de por medio.
+        </aside>
+      </section>
+
+      <!-- 3 · Estática vs dinámica -->
+      <section>
+        <h2>De la página estática a la dinámica</h2>
+        <div class="cols">
+          <div class="panel">
+            <h3>Estática</h3>
+            <ul>
+              <li>Fichero <code>.html</code> que el servidor entrega <strong>tal cual</strong></li>
+              <li>Igual para todos los visitantes</li>
+            </ul>
+          </div>
+          <div class="panel fragment">
+            <h3>Dinámica</h3>
+            <ul>
+              <li>El servidor <strong>ejecuta código</strong> en el momento de la petición</li>
+              <li>El HTML cambia según los datos, el usuario o el momento</li>
+            </ul>
+          </div>
+        </div>
+        <aside class="notes">
+          Pregunta al grupo: ¿qué páginas que uséis a diario muestran algo distinto según quién sois o cuándo entráis?
+        </aside>
+      </section>
+
+      <!-- 4 · Código embebido -->
+      <section>
+        <h2>Código embebido</h2>
+        <ul>
+          <li class="fragment">Escribimos <strong>HTML normal</strong>…</li>
+          <li class="fragment">…y donde necesitamos que "pase algo", insertamos <strong>fragmentos de código</strong></li>
+          <li class="fragment">El servidor los ejecuta <strong>antes</strong> de enviar la respuesta</li>
+          <li class="fragment">El navegador <strong>nunca ve ese código</strong>: solo recibe el HTML resultante</li>
+        </ul>
+      </section>
+
+      <!-- 5 · Flujo en producción -->
+      <section>
+        <h2>El flujo en producción</h2>
+        <img class="flow" src="https://raw.githubusercontent.com/2DAW-CarlosIII/marcapersonalFP_REA/refs/heads/master/documentos/0613_Servidor/images/flujo_peticion_php_produccion.svg"
+             alt="Flujo petición-respuesta en producción: el navegador del usuario se comunica por Internet con nginx, que delega el .php en php-fpm">
+        <p class="small-text muted">Navegador y servidor en máquinas distintas: petición y respuesta viajan por Internet.</p>
+      </section>
+
+      <!-- 6 · Flujo en desarrollo -->
+      <section>
+        <h2>El flujo en nuestro entorno</h2>
+        <img class="flow" src="https://raw.githubusercontent.com/2DAW-CarlosIII/marcapersonalFP_REA/refs/heads/master/documentos/0613_Servidor/images/flujo_peticion_php.svg"
+             alt="Flujo petición-respuesta en desarrollo: navegador, nginx y php-fpm conviven en la misma máquina virtual">
+        <p class="small-text muted">Todo convive en la VM, pero la petición y la respuesta HTTP <strong>siguen siendo reales</strong>.</p>
+        <aside class="notes">
+          Insistir: al no haber red de por medio es fácil olvidar que sigue habiendo petición y respuesta HTTP.
+          Solo cambia el "viaje": ocurre entre programas de la misma máquina, no entre dos máquinas.
+        </aside>
+      </section>
+
+      <!-- 7 · Idea clave -->
+      <section>
+        <h2>Idea clave</h2>
+        <p class="statement">El cliente recibe <strong>HTML</strong>.<br>El código se queda y se ejecuta <strong>en el servidor</strong>.</p>
+        <p class="small-text muted fragment" style="margin-top:1.4em">Y esto no cambia porque, en desarrollo, cliente y servidor compartan máquina.</p>
+      </section>
+
+      <!-- 8 · Tecnologías asociadas -->
+      <section>
+        <h2>Tecnologías asociadas</h2>
+        <ul>
+          <li>
+            <span class="has-tip"><strong>PHP</strong>
+              <span class="tooltip">Se embebe con <code>&lt;?php … ?&gt;</code>. El atajo <code>&lt;?= $x ?&gt;</code> equivale a <code>echo</code>.</span>
+            </span> <span class="muted small-text">— el que usaremos: nació para embeberse en HTML</span>
+          </li>
+          <li>
+            <span class="has-tip"><strong>ASP / ASP.NET</strong>
+              <span class="tooltip">ASP clásico usa <code>&lt;% … %&gt;</code>. En ASP.NET, las vistas Razor mezclan HTML y C# con <code>@</code>.</span>
+            </span> <span class="muted small-text">— Microsoft</span>
+          </li>
+          <li>
+            <span class="has-tip"><strong>JSP</strong>
+              <span class="tooltip"><em>JavaServer Pages</em>: <code>&lt;% … %&gt;</code> y <code>&lt;%= … %&gt;</code>; hoy se prefiere el lenguaje de expresiones <code>${…}</code>.</span>
+            </span> <span class="muted small-text">— plataforma Java</span>
+          </li>
+          <li>
+            <span class="has-tip"><strong>Python</strong>
+              <span class="tooltip">Sin "código embebido" nativo: se usan plantillas (Jinja2 en Flask, las de Django) con <code>{{ … }}</code> y <code>{% … %}</code>.</span>
+            </span> <span class="muted small-text">— WSGI/ASGI con Django o Flask</span>
+          </li>
+          <li>
+            <span class="has-tip"><strong>JavaScript (Node.js)</strong>
+              <span class="tooltip">Con Express y motores de plantillas: EJS usa <code>&lt;% … %&gt;</code> (muy parecido a PHP); Handlebars, <code>{{ … }}</code>.</span>
+            </span> <span class="muted small-text">— Express + EJS / Handlebars</span>
+          </li>
+        </ul>
+        <p class="small-text muted">Pasa el ratón por cada una para ver cómo embebe el código.</p>
+        <aside class="notes">
+          Misma idea (código que el servidor ejecuta para producir el marcado del cliente); cambian sintaxis y ecosistema.
+          PHP por ser el más extendido en la web y la base sobre la que se construye Laravel. Enlaza con el ejercicio 4.
+        </aside>
+      </section>
+
+      <!-- 9 · Las etiquetas <?php ?> -->
+      <section>
+        <h2>Las etiquetas <code>&lt;?php ?&gt;</code></h2>
+        <p class="small-text">En un fichero <code>.php</code>, todo se envía al navegador <strong>tal cual</strong>, como HTML,<br><strong>excepto</strong> lo que quede entre las etiquetas de PHP:</p>
+        <pre class="compacto"><code class="language-php" data-trim>
+&lt;?php
+  // Esto es código PHP: el servidor lo ejecuta, el navegador no lo ve.
+?&gt;
+        </code></pre>
+        <div class="cols small-text">
+          <div class="panel"><code class="nw">&lt;?php</code> <strong>abre</strong> una zona de código PHP</div>
+          <div class="panel fragment"><code class="nw">?&gt;</code> <strong>cierra</strong> la zona y vuelve al modo HTML</div>
+        </div>
+      </section>
+
+      <!-- 10 · HTML + PHP -->
+      <section>
+        <h2>HTML y PHP en el mismo documento</h2>
+        <pre class="ancho"><code class="language-php-template" data-trim data-line-numbers="|9">
+&lt;!DOCTYPE html&gt;
+&lt;html lang="es"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;marcapersonalFP v0&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;Hola, marcapersonalFP&lt;/h1&gt;
+    &lt;p&gt;Esta página se ha generado el &lt;?php echo date('d/m/Y H:i:s'); ?&gt;.&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+        </code></pre>
+        <p class="small-text">Todo el HTML se envía sin cambios; solo ese fragmento <strong>se ejecuta en el servidor</strong> y se sustituye por su resultado.</p>
+        <aside class="notes">
+          Primer clic: el documento completo. Segundo clic: la línea 9, la única que ejecuta el servidor.
+          Si recargas la página, la hora cambia: eso es una página dinámica.
+        </aside>
+      </section>
+
+      <!-- 11 · Fuente vs resultado -->
+      <section>
+        <h2>¿Qué recibe el navegador?</h2>
+        <p class="label muted">Lo que escribes · <code>RA2_holaMundo.php</code></p>
+        <pre class="compacto"><code class="language-php-template" data-trim>
+&lt;p&gt;Esta página se ha generado el &lt;?php echo date('d/m/Y H:i:s'); ?&gt;.&lt;/p&gt;
+        </code></pre>
+        <div class="fragment">
+          <p class="small-text muted" style="margin:14px 0 0">↓ el servidor ejecuta el PHP y envía…</p>
+          <p class="label muted">Lo que recibe el navegador · HTML</p>
+          <pre class="compacto"><code class="language-html" data-trim>
+&lt;p&gt;Esta página se ha generado el 21/09/2026 09:30:12.&lt;/p&gt;
+          </code></pre>
+        </div>
+        <p class="small-text fragment" style="margin-top:1em">Cada recarga produce otra hora: página <strong>dinámica</strong>.</p>
+      </section>
+
+      <!-- 12 · Ficheros solo PHP -->
+      <section>
+        <h2>¿Cerrar o no cerrar <code class="nw">?&gt;</code>?</h2>
+        <div class="cols">
+          <div class="panel">
+            <h3>Solo código PHP</h3>
+            <p>Convención: <strong>omitir</strong> el <code class="nw">?&gt;</code> final.</p>
+            <p class="small-text muted">Evita problemas con espacios en blanco accidentales. Lo veremos en las clases del proyecto.</p>
+          </div>
+          <div class="panel fragment">
+            <h3>HTML mezclado con PHP</h3>
+            <p><strong>Abrimos y cerramos</strong> cada fragmento.</p>
+            <p class="small-text muted">Como en <code>RA2_holaMundo.php</code>.</p>
+          </div>
+        </div>
+        <aside class="notes">
+          Un espacio o salto de línea tras el ?> final se envía al navegador y puede provocar el clásico error
+          "headers already sent" cuando más adelante se intenten enviar cabeceras.
+        </aside>
+      </section>
+
+      <!-- 13 · Dos contenedores -->
+      <section>
+        <h2>Dos contenedores, dos trabajos</h2>
+        <p class="small-text muted">Un único entorno para todo el curso: la VM con <em>Laradock</em> (Docker + nginx + php-fpm).</p>
+        <div class="cols">
+          <div class="panel nginx">
+            <h3><code>nginx</code></h3>
+            <p>La <strong>puerta HTTP</strong> (puerto 80).</p>
+            <p class="small-text muted">Es a quien apunta el navegador.</p>
+          </div>
+          <div class="panel fpm fragment">
+            <h3><code>php-fpm</code></h3>
+            <p>El <strong>motor</strong> que ejecuta el PHP.</p>
+            <p class="small-text muted">Habla FastCGI por el puerto 9000, <strong>no</strong> HTTP.</p>
+          </div>
+        </div>
+        <p class="small-text fragment" style="margin-top:1.2em">Necesitamos <strong>los dos</strong> levantados.</p>
+        <aside class="notes">
+          Si algún alumno no tiene la máquina virtual: primero "0. Instalación y preparación del entorno".
+        </aside>
+      </section>
+
+      <!-- 14 · Levantar el entorno -->
+      <section>
+        <h2>Levantar el entorno</h2>
+        <pre class="mediano"><code class="language-bash" data-trim>
+# desde la carpeta laradock/
+docker compose up -d nginx php-fpm
+        </code></pre>
+        <p class="small-text">En Laradock <code>nginx</code> depende de <code>php-fpm</code>: un comando levanta ambos.</p>
+        <pre class="mediano"><code class="language-plaintext" data-trim>
+~/Documentos/laravel/
+├── laradock/
+└── vanilla_php/
+    └── public/               ← raíz web de nginx
+        └── RA2_holaMundo.php
+        </code></pre>
+        <p class="small-text muted">En el contenedor, la raíz web es <code>/var/www/vanilla_php/public</code>.</p>
+      </section>
+
+      <!-- 15 · Primer script -->
+      <section>
+        <h2>Tu primer script</h2>
+        <ol class="pasos">
+          <li>Guarda el ejemplo HTML + PHP como <code>vanilla_php/public/RA2_holaMundo.php</code></li>
+          <li>Abre en el navegador <code>http://localhost/RA2_holaMundo.php</code></li>
+        </ol>
+        <div class="cols una small-text" style="margin-top:1.2em">
+          <div class="panel fragment">Navega al <strong>fichero concreto</strong>. Con <code>http://localhost/</code> a secas y sin <code>index.php</code> obtendrás un <strong>404</strong>.</div>
+          <div class="panel fragment">¿Puerto 80 ocupado? Cambia <code>NGINX_HOST_HTTP_PORT</code> en el <code>.env</code> de Laradock (p. ej. <code>8080</code>) y usa <code>http://localhost:8080/RA2_holaMundo.php</code>.</div>
+        </div>
+        <aside class="notes">
+          Error muy típico: hacer doble clic en el .php (file://) y ver el código sin ejecutar.
+          Debe abrirse siempre a través de http://localhost, que es lo que pasa por nginx y php-fpm.
+        </aside>
+      </section>
+
+      <!-- 16 · Comprobación -->
+      <section>
+        <h2>Comprueba que el código vive en el servidor</h2>
+        <ol class="pasos compacta">
+          <li>Con la página abierta: <kbd>Ctrl</kbd>+<kbd>U</kbd> ("Ver código fuente")</li>
+          <li class="fragment">No aparece ninguna etiqueta <code>&lt;?php ?&gt;</code>: solo el HTML final, con la fecha ya sustituida</li>
+          <li class="fragment">Compáralo con <code>vanilla_php/public/RA2_holaMundo.php</code>: <strong>ahí sí</strong> está el código</li>
+        </ol>
+        <p class="small-text muted fragment" style="margin-top:1.2em">Esa es la prueba de que PHP se ejecutó en el servidor.</p>
+      </section>
+
+      <!-- 17 · Lo esencial -->
+      <section>
+        <h2>Lo esencial</h2>
+        <ul>
+          <li>El servidor ejecuta el PHP; el navegador <strong>solo recibe HTML</strong></li>
+          <li>Todo lo que queda fuera de <code>&lt;?php ?&gt;</code> se envía <strong>tal cual</strong></li>
+          <li><code>nginx</code> atiende HTTP y <code>php-fpm</code> ejecuta el código; los scripts van en <code>vanilla_php/public/</code></li>
+          <li><kbd>Ctrl</kbd>+<kbd>U</kbd> nunca mostrará código PHP</li>
+        </ul>
+      </section>
+
+      <!-- 18 · Ejercicios 1-2 -->
+      <section>
+        <h2>Ejercicios (1/2)</h2>
+        <ol class="pasos">
+          <li><strong>Primer script.</strong> Crea <code>vanilla_php/public/RA2_holaMundo.php</code> con el ejemplo, levanta el entorno y visualízalo. Recarga varias veces: la hora debe cambiar.</li>
+          <li><strong>Fuente vs. resultado.</strong> Con <kbd>Ctrl</kbd>+<kbd>U</kbd> confirma que no hay etiquetas PHP. Anota en un comentario del fichero qué diferencia hay entre lo que escribes y lo que recibe el navegador.</li>
+        </ol>
+      </section>
+
+      <!-- 19 · Ejercicios 3-4 -->
+      <section>
+        <h2>Ejercicios (2/2)</h2>
+        <ol class="pasos" start="3">
+          <li><strong>Mezcla HTML/PHP.</strong> Añade un segundo párrafo que muestre, con <code>echo</code>, el nombre del centro (<code>marcapersonalFP</code>) y el año actual (<code>date('Y')</code>) dentro de una frase de bienvenida.</li>
+          <li><strong>Investiga.</strong> Elige una de las tecnologías asociadas (ASP, JSP, Python, Node.js) y escribe dos líneas en un comentario del script: en qué se parece y en qué se diferencia de PHP en cuanto a "código embebido".</li>
+        </ol>
+      </section>
+
+      <!-- 20 · Autocorrección -->
+      <section>
+        <h2>Comprueba tu solución (opcional)</h2>
+        <ol class="pasos">
+          <li>Copia <code>RA2_1_HolaMundoTest.php</code> a <code>vanilla_php/tests/</code></li>
+          <li>Desde la carpeta <code>laradock/</code>, ejecuta ese test:</li>
+        </ol>
+        <pre class="compacto"><code class="language-bash" data-trim>
+docker compose exec --workdir /var/www/vanilla_php workspace \
+  vendor/bin/phpunit tests/RA2_1_HolaMundoTest.php
+        </code></pre>
+        <p class="small-text">Si todo está bien: <code>OK (2 tests, 4 assertions)</code>. Si no, PHPUnit dice <strong>cuál</strong> de las dos comprobaciones falla y por qué.</p>
+        <aside class="notes">
+          No hace falta entender cómo está escrito el test: se verá como contenido en el Bloque 7 (TDD). De momento solo se ejecuta y se lee el resultado.
+        </aside>
+      </section>
+
+      <!-- 21 · Siguiente -->
+      <section>
+        <p class="small-text muted">Siguiente</p>
+        <h2>2.2. Sintaxis, sentencias y salida (<code>echo</code>/<code>print</code>)</h2>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/reveal.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/plugin/notes.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/plugin/highlight.js"></script>
+  <script>
+    Reveal.initialize({
+      hash: true,
+      slideNumber: 'c/t',
+      transition: 'slide',
+      // Al exportar a PDF (añadir ?print-pdf a la URL): una página por diapositiva, con todos los fragmentos visibles
+      pdfSeparateFragments: false,
+      plugins: [ RevealHighlight, RevealNotes ]
+    });
+  </script>
+</body>
+</html>
