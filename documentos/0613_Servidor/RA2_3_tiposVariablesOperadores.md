@@ -1,5 +1,7 @@
 # 2.3. Tipos de datos, variables y constantes, operadores
 
+**Presentación de apoyo** (_RevealJS_): [RA2_3_tiposVariablesOperadores_slides.html](./materiales/slides/RA2_3_tiposVariablesOperadores_slides.html)
+
 ## Tipos de datos
 
 PHP tiene **tipado dinámico**: no declaras el tipo de una variable, lo determina automáticamente el valor que le asignas. Los tipos **escalares** (un único valor) que usaremos en este bloque son:

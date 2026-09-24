@@ -1,0 +1,611 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>2.3. Tipos de datos, variables y constantes, operadores · marcapersonalFP v0</title>
+
+  <!--
+    reveal.js 6.0.2 cargado desde CDN con la versión fijada.
+
+    IMPORTANTE (cambio de la v5 a la v6): ya no existe la carpeta plugin/ en la raíz
+    del paquete. Todo cuelga de dist/:
+        dist/reveal.js · dist/reveal.css · dist/reset.css · dist/theme/*.css
+        dist/plugin/notes.js · dist/plugin/highlight.js · dist/plugin/highlight/monokai.css
+
+    Para trabajar SIN Internet: descarga el paquete (npm pack reveal.js@6.0.2),
+    copia su carpeta dist/ junto a este fichero y sustituye
+    "https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/" por "./reveal.js/".
+  -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/reveal.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/theme/black.css">
+  <!-- Tema del código resaltado -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/plugin/highlight/monokai.css">
+
+  <style>
+    /* ═══════════ Estilo base: el de tus presentaciones anteriores ═══════════ */
+    .reveal section img { background:none; border:none; box-shadow:none; }
+    .reveal h1, .reveal h2, .reveal h3 { color: #13DAEC; }
+    .reveal ul { list-style-type: none; }
+    .reveal ul li { margin: 10px 0; }
+    .small-text { font-size: 0.7em; }
+
+    /* Tooltips: mismo mecanismo que en las otras presentaciones.
+       Las clases .file-type / .access-type / .db-type eran idénticas y aquí se unifican en .has-tip */
+    .has-tip {
+      cursor: pointer;
+      position: relative;
+      display: inline-block;
+      padding: 5px;
+      margin: 5px 0;
+    }
+    .has-tip:hover { color: #13DAEC; }
+
+    .tooltip {
+      visibility: hidden;
+      position: absolute;
+      z-index: 1;
+      width: 400px;
+      background-color: rgba(0,0,0,0.9);
+      color: #fff;
+      text-align: left;
+      border-radius: 6px;
+      padding: 10px;
+      font-size: 0.6em;
+      font-weight: normal;
+      left: 90%;
+      top: 50%;
+      transform: translateY(-50%);
+      border: 1px solid rgba(19,218,236,0.45);   /* añadido: sobre fondo oscuro, sin borde casi no se distingue */
+    }
+    .has-tip:hover .tooltip { visibility: visible; }
+    .tooltip::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      right: 100%;
+      margin-top: -5px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: transparent rgba(0,0,0,0.9) transparent transparent;
+    }
+
+    /* Logo del centro */
+    .bg-logo {
+      position: fixed;
+      top: 10px;
+      right: 100px;
+      width: 100px;
+      height: 100px;
+      z-index: 1000;
+    }
+    /* El <text> del SVG no define fill (negro por defecto) y sobre fondo oscuro no se veía */
+    .bg-logo svg text { fill: #fff; }
+
+
+    /* ═══════════ Añadidos para esta presentación ═══════════ */
+    .muted { color: #9aa7ad; }
+
+    /* Portada */
+    .reveal h1.titulo { font-size: 1.9em; margin: 0.35em 0 0.3em; }
+
+    /* Columnas y paneles con filo de color (el color indica quién es quién) */
+    .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; text-align: left; align-items: start; }
+    .cols > * { min-width: 0; }
+    .panel { border-left: 4px solid #13DAEC; padding: 2px 0 2px 22px; }
+    .panel h3 { font-size: 0.95em; margin: 0 0 10px; }
+    .panel p { margin: 8px 0; }
+    .panel ul { margin: 0; display: block; }
+    .panel.nginx { border-color: #10B981; }   /* mismos colores que en los diagramas */
+    .panel.fpm   { border-color: #8B5CF6; }
+    .panel.client{ border-color: #3B82F6; }
+
+    /* Diagramas SVG del repositorio (llevan su propio fondo claro) */
+    .reveal img.flow { display: block; width: 880px; max-width: 100%; height: auto; margin: 6px auto 14px; }
+
+    /* Idea clave */
+    .statement { font-size: 1.3em; line-height: 1.3; text-align: left; border-left: 6px solid #13DAEC; padding: 6px 0 6px 30px; margin: 0 30px; }
+
+    /* Código */
+    .reveal :not(pre) > code { background: rgba(255,255,255,0.09); border-radius: 4px; padding: 0 0.2em; }
+    .reveal code.nw { white-space: nowrap; }          /* símbolos cortos (?>) que no deben partirse entre líneas */
+    .reveal pre { width: 100%; }
+    .reveal pre.mediano  { font-size: 0.62em; }
+    .reveal pre.compacto { font-size: 0.5em; }        /* líneas de ~70 caracteres */
+    .reveal pre.ancho    { font-size: 0.45em; }       /* línea de 75 caracteres + numeración */
+    .label { font-size: 0.6em; margin: 14px 0 6px; text-align: left; }
+
+    /* Teclas */
+    .reveal kbd {
+      font-family: var(--r-code-font); font-size: 0.8em;
+      background: #2b2b2b; border: 1px solid #555; border-bottom-width: 3px;
+      border-radius: 6px; padding: 0 0.4em;
+    }
+
+    /* Listas: ancho acotado para que el texto no llegue hasta el logo */
+    .reveal ul, .reveal ol.pasos { max-width: 860px; }
+    .reveal ol.pasos { margin: 0; display: block; text-align: left; padding-left: 1.3em; }
+    .reveal ol.pasos li { margin: 14px 0; }
+    .reveal ol.pasos.compacta { font-size: 0.88em; }
+    .cols.una { grid-template-columns: 1fr; gap: 14px; }
+
+    /* ── Reutilizado de 2.2: tabla y ventana de navegador ── */
+    .reveal pre { width: 92%; }                       /* un poco más estrecho: en ventanas 16:9 pequeñas el logo se mete en el margen */
+    .cols pre { width: 100%; }                        /* dentro de una columna, a todo el ancho de la columna */
+    .reveal pre.medio { font-size: 0.56em; }          /* código de ~55-60 caracteres por línea */
+
+    /* El párrafo que sigue al título no llega hasta la zona del logo */
+    .reveal section > h2 + p { max-width: 800px; margin-left: auto; margin-right: auto; }
+
+    /* Tabla comparativa echo / print */
+    .reveal table { margin: 0 auto; font-size: 0.72em; border-collapse: separate; border-spacing: 0; }   /* separate: las rayas de cada fila aparecen con su fragmento */
+    .reveal table th, .reveal table td { padding: 0.5em 0.9em; border-bottom: 1px solid rgba(255,255,255,0.22); vertical-align: top; }
+    .reveal table thead th { color: #13DAEC; font-size: 1.1em; border-bottom: 2px solid #13DAEC; }
+    .reveal table tbody th { color: #9aa7ad; white-space: nowrap; }
+
+    /* Ventana de navegador: mismo lenguaje visual que los diagramas del REA (panel claro con tres puntos) */
+    .browser { background: #F8FAFC; color: #1f2937; border-radius: 14px; padding: 14px 26px 20px; margin: 10px auto 18px; max-width: 860px; text-align: left; }
+    .browser .bar { display: flex; gap: 7px; margin-bottom: 10px; }
+    .browser .bar i { display: block; width: 12px; height: 12px; border-radius: 50%; }
+    .browser .bar i:nth-child(1) { background: #EF4444; }
+    .browser .bar i:nth-child(2) { background: #F59E0B; }
+    .browser .bar i:nth-child(3) { background: #10B981; }
+    .browser p { margin: 0; color: #1f2937; font-size: 0.85em; }
+
+    /* ── Solo en 2.3 ── */
+    .ok { color: #10B981; }
+    .ko { color: #EF4444; }
+    .reveal table code { white-space: nowrap; }
+  </style>
+</head>
+<body>
+
+    <div class="bg-logo">
+      <svg
+         version="1.1"
+         id="svg18"
+         width="200"
+         height="200"
+         viewBox="0 0 200 200"
+         sodipodi:docname="c3_logo"
+         inkscape:version="1.2.2 (732a01da63, 2022-12-09, custom)"
+         xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+         xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+         xmlns="http://www.w3.org/2000/svg"
+         xmlns:svg="http://www.w3.org/2000/svg">
+        <defs
+           id="defs22" />
+        <sodipodi:namedview
+           id="namedview20"
+           pagecolor="#ffffff"
+           bordercolor="#666666"
+           borderopacity="1.0"
+           inkscape:showpageshadow="2"
+           inkscape:pageopacity="0.0"
+           inkscape:pagecheckerboard="0"
+           inkscape:deskcolor="#d1d1d1"
+           showgrid="false"
+           showguides="true"
+           inkscape:zoom="4.065"
+           inkscape:cx="114.88315"
+           inkscape:cy="100"
+           inkscape:window-width="1850"
+           inkscape:window-height="1016"
+           inkscape:window-x="363"
+           inkscape:window-y="1467"
+           inkscape:window-maximized="1"
+           inkscape:current-layer="g24">
+          <sodipodi:guide
+             position="115.44994,191"
+             orientation="0,-1"
+             id="guide1222"
+             inkscape:locked="false" />
+          <sodipodi:guide
+             position="23,159.16359"
+             orientation="1,0"
+             id="guide1243"
+             inkscape:locked="false" />
+          <sodipodi:guide
+             position="117.02658,36.55078"
+             orientation="0,-1"
+             id="guide1245"
+             inkscape:locked="false" />
+        </sodipodi:namedview>
+        <g
+           inkscape:groupmode="layer"
+           inkscape:label="Image"
+           id="g24">
+          <rect
+             style="opacity:1;fill:#000000;fill-opacity:0.99702;stroke:none;stroke-width:1;stroke-dasharray:none"
+             id="rect1299"
+             width="155"
+             height="155"
+             x="23"
+             y="9" />
+          <path
+             style="fill:none"
+             d="M 23.666667,163.33333 23,162.66667 V 85.833333 9 h 46.224972 46.224968 l -7.45639,7.506491 -7.45639,7.50649 15.46932,15.49351 L 131.4758,55 116,70.5 100.5242,86 116,101.5 131.4758,117 116.2379,132.26173 101,147.52346 v 0.96475 0.96476 l 7.22497,7.27351 L 115.44994,164 H 69.891639 24.333333 Z"
+             id="path345" />
+          <g
+             id="g1241"
+             style="mix-blend-mode:normal;fill:#ffffff;fill-opacity:1;stroke:none;opacity:1"
+             transform="translate(-0.14725,0.06445)">
+            <path
+               id="rect557"
+               style="opacity:0.4;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1.31377"
+               d="m 88.718423,-32.506196 -0.0014,65.687734 H 154.40616 V 10.554121 h -43.0617 l 0.001,-43.060317 z"
+               transform="rotate(45)" />
+            <path
+               id="path1118"
+               style="opacity:0.4;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1.31377"
+               d="m 117.17383,9.5917969 -16,16.0000001 30.44922,30.447265 -14.44922,14.449219 -16,16 16,15.999999 14.44922,14.44727 -30.44922,30.44922 16,16 46.44922,-46.44922 -30.44922,-30.447269 30.44922,-30.449219 z" />
+          </g>
+          <text
+             xml:space="preserve"
+             style="font-size:22.2045px;line-height:1.25;font-family:sans-serif;stroke-width:0.925188"
+             x="25.699196"
+             y="168.92"
+             id="text1355"
+             transform="scale(0.87462907,1.1433418)"><tspan
+               sodipodi:role="line"
+               id="tspan1353"
+               x="25.699196"
+               y="168.92"
+               style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:24.6717px;font-family:'URW Gothic';-inkscape-font-specification:'URW Gothic, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.925188">CIFP CARLOS III</tspan></text>
+        </g>
+      </svg>
+    </div>
+
+  <div class="reveal">
+    <div class="slides">
+      <!-- 1 · Portada -->
+      <section>
+        <p class="small-text muted">Desarrollo Web en Entorno Servidor · Bloque 2 · RA2</p>
+        <h1 class="titulo" style="font-size:1.6em">2.3. Tipos, variables,<br>constantes y operadores</h1>
+        <p class="muted">Qué guarda PHP y cómo lo combina</p>
+        <p class="small-text muted">Seguimos con <em>marcapersonalFP</em> v0 en PHP plano</p>
+        <aside class="notes">
+          Seguimos sobre el proyecto vanilla_php. En 2.2 ya usamos variables "de forma intuitiva"; hoy se formalizan:
+          tipos, reglas de las variables, constantes y operadores (CE g). Tecla S: vista del ponente. Tecla O: vista general.
+        </aside>
+      </section>
+
+      <!-- 2 · Tipado dinámico -->
+      <section>
+        <h2>Tipado dinámico</h2>
+        <p class="statement">No declaras el tipo de una variable:<br>lo determina el <strong>valor</strong> que le asignas.</p>
+        <p class="small-text muted fragment" style="margin-top:1.4em">En 2.2 usamos variables de forma intuitiva. Hoy formalizamos las reglas.</p>
+        <aside class="notes">
+          Este es el hilo de toda la sección: como el tipo lo pone el valor, una misma variable puede cambiar de tipo,
+          y de ahí saldrá la diferencia entre == y === al final.
+        </aside>
+      </section>
+
+      <!-- 3 · Tipos escalares -->
+      <section>
+        <h2>Tipos escalares</h2>
+        <table>
+          <thead>
+            <tr><th>Tipo</th><th>Ejemplo</th><th>Significa</th></tr>
+          </thead>
+          <tbody>
+            <tr class="fragment"><th scope="row"><code>int</code> (entero)</th><td><code>2000</code></td><td>Un número sin decimales</td></tr>
+            <tr class="fragment"><th scope="row"><code>float</code> (o <code>double</code>)</th><td><code>8.75</code></td><td>Un número con decimales</td></tr>
+            <tr class="fragment"><th scope="row"><code>string</code> (cadena)</th><td><code>"DAW"</code></td><td>Texto</td></tr>
+            <tr class="fragment"><th scope="row"><code>bool</code> (booleano)</th><td><code>true</code> / <code>false</code></td><td>Verdadero o falso</td></tr>
+          </tbody>
+        </table>
+        <p class="small-text muted" style="margin-top:1.2em">Tipos compuestos, en el Bloque 3: <code>array</code> y <code>object</code>. Y un tipo especial: <code>null</code>, ausencia de valor.</p>
+      </section>
+
+      <!-- 4 · var_dump -->
+      <section>
+        <h2><code>var_dump()</code></h2>
+        <pre class="medio"><code class="language-php" data-trim data-line-numbers="|2|3">
+&lt;?php
+  var_dump(2000);     // int(2000)
+  var_dump("2000");   // string(4) "2000"
+?&gt;
+        </code></pre>
+        <p class="small-text">Muestra el <strong>tipo</strong> y el <strong>valor</strong> exactos: sirve para distinguir un <code>"2000"</code> (string) de un <code>2000</code> (int).</p>
+        <p class="small-text muted">Herramienta de depuración: no la usarás en el HTML final que ve un usuario real.</p>
+        <aside class="notes">
+          Los literales 2000 y "2000" son una ilustración añadida a la presentación; en el REA el ejemplo es $horas = 2000; var_dump($horas);.
+          El 4 de string(4) es el número de caracteres de la cadena.
+        </aside>
+      </section>
+
+      <!-- 5 · Reglas de las variables -->
+      <section>
+        <h2>Variables: reglas</h2>
+        <ul class="small-text">
+          <li>El nombre empieza por <code>$</code>, seguido de una letra o <code>_</code></li>
+          <li>Continúa con letras, dígitos o <code>_</code></li>
+          <li>Distinguen mayúsculas y minúsculas (ya lo vimos en 2.2)</li>
+        </ul>
+        <div class="cols">
+          <div class="panel client">
+            <h3>Válidos</h3>
+            <p><code>$codCiclo</code></p>
+            <p><code>$horas2024</code></p>
+            <p><code>$_temp</code></p>
+          </div>
+          <div class="panel fragment" style="border-color:#EF4444">
+            <h3>No válidos</h3>
+            <p><code>$2024horas</code> <span class="small-text muted">empieza por dígito</span></p>
+            <p><code>$cod-ciclo</code> <span class="small-text muted">el guion es una resta</span></p>
+          </div>
+        </div>
+        <aside class="notes">
+          Los ejemplos válidos son los del REA. Los "no válidos" son una ilustración añadida a la presentación.
+        </aside>
+      </section>
+
+      <!-- 6 · Una variable puede cambiar de tipo -->
+      <section>
+        <h2>Una variable puede cambiar de tipo</h2>
+        <pre class="medio"><code class="language-php" data-trim data-line-numbers="|2|3">
+&lt;?php
+  $dato = "DAW";   // ahora mismo es un string
+  $dato = 10;      // ahora es un int: no hay ningún error
+?&gt;
+        </code></pre>
+        <p class="small-text">Cómodo… pero es la causa de bastantes <strong>errores sutiles</strong>.</p>
+        <p class="small-text muted fragment">Lo veremos enseguida con los operadores de comparación.</p>
+      </section>
+
+      <!-- 7 · Constantes -->
+      <section>
+        <h2>Constantes</h2>
+        <p class="small-text">Un valor con nombre que, a diferencia de una variable, <strong>no puede cambiar</strong> una vez definido. No lleva <code>$</code> y, por convención, se escribe en <code class="nw">MAYÚSCULAS_CON_GUIONES_BAJOS</code>.</p>
+        <div class="cols">
+          <div class="panel">
+            <h3><code>define()</code></h3>
+            <p>Una <strong>función</strong>: válida en cualquier punto del script.</p>
+          </div>
+          <div class="panel fragment">
+            <h3><code>const</code></h3>
+            <p>Una <strong>palabra clave</strong>: se resuelve al cargar el script.</p>
+          </div>
+        </div>
+        <p class="small-text muted fragment" style="margin-top:1.2em">Para scripts sueltos son equivalentes. En POO (Bloque 3), <code>const</code> también vale dentro de una clase; <code>define()</code>, no.</p>
+      </section>
+
+      <!-- 8 · Constantes en código -->
+      <section>
+        <h2>Constantes en código</h2>
+        <pre class="ancho"><code class="language-php" data-trim data-line-numbers="|2|3|5">
+&lt;?php
+  define('NOMBRE_CENTRO', 'CIFP Carlos III');   // función
+  const CODIGO_CENTRO = '30012345';             // palabra clave
+
+  echo '&lt;p&gt;Centro: ', NOMBRE_CENTRO, ' (código ', CODIGO_CENTRO, ')&lt;/p&gt;';
+?&gt;
+        </code></pre>
+        <p class="small-text">Se usan por su nombre, <strong>sin <code>$</code></strong>.</p>
+      </section>
+
+      <!-- 9 · Operadores -->
+      <section>
+        <h2>Operadores</h2>
+        <p class="statement" style="font-size:1.1em">Combinan uno o varios valores<br>para producir <strong>otro</strong>.</p>
+        <ul class="small-text" style="margin-top:1.2em">
+          <li class="fragment"><strong>Aritméticos</strong> y de <strong>asignación</strong></li>
+          <li class="fragment">De <strong>comparación</strong></li>
+          <li class="fragment"><strong>Lógicos</strong></li>
+        </ul>
+      </section>
+
+      <!-- 10 · Aritméticos y de asignación -->
+      <section>
+        <h2>Aritméticos y de asignación</h2>
+        <div class="cols">
+          <div class="panel">
+            <h3>Aritméticos</h3>
+            <p><code>+</code> <code>-</code> <code>*</code> <code>/</code> <span class="small-text muted">suma, resta, multiplicación, división</span></p>
+            <p><code>%</code> <span class="small-text muted">resto de la división entera (módulo)</span></p>
+          </div>
+          <div class="panel fragment">
+            <h3>De asignación</h3>
+            <p><code>=</code> <span class="small-text muted">asigna</span></p>
+            <p><code>+=</code> <code>-=</code> <code>*=</code> <code>/=</code> <code>.=</code> <span class="small-text muted">modifican y reasignan en un paso</span></p>
+          </div>
+        </div>
+        <pre class="medio fragment"><code class="language-php" data-trim>
+$horas += 20;    // equivale a
+$horas = $horas + 20;
+        </code></pre>
+      </section>
+
+      <!-- 11 · Comparación -->
+      <section>
+        <h2>Operadores de comparación</h2>
+        <table>
+          <thead>
+            <tr><th>Operador</th><th>Compara</th></tr>
+          </thead>
+          <tbody>
+            <tr class="fragment"><th scope="row"><code>==</code></th><td>el <strong>valor</strong>, convirtiendo tipos si hace falta</td></tr>
+            <tr class="fragment"><th scope="row"><code>===</code></th><td>el <strong>valor y el tipo</strong>, sin convertir nada</td></tr>
+            <tr class="fragment"><th scope="row"><code>!=</code> / <code>!==</code></th><td>las versiones negadas de las anteriores</td></tr>
+            <tr class="fragment"><th scope="row"><code>&lt;</code> <code>&gt;</code> <code>&lt;=</code> <code>&gt;=</code></th><td>orden</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- 12 · == frente a === -->
+      <section>
+        <h2><code>==</code> frente a <code>===</code></h2>
+        <div class="cols">
+          <div class="panel">
+            <h3><code>"10" == 10</code></h3>
+            <p><strong class="ok">true</strong></p>
+            <p class="small-text muted">PHP convierte el string a número antes de comparar.</p>
+          </div>
+          <div class="panel fragment" style="border-color:#EF4444">
+            <h3><code>"10" === 10</code></h3>
+            <p><strong class="ko">false</strong></p>
+            <p class="small-text muted">Los tipos no coinciden: string frente a int.</p>
+          </div>
+        </div>
+        <p class="statement fragment" style="font-size:0.95em; margin-top:1.4em">En este REA usaremos <strong>siempre <code>===</code></strong>: es más predecible y evita errores difíciles de rastrear.</p>
+        <aside class="notes">
+          Aquí se cierra el hilo del tipado dinámico: como una variable puede ser "10" o 10 sin que PHP se queje,
+          == puede dar resultados que sorprenden. === no convierte nada.
+          Se dice "salvo que tengamos una razón concreta para lo contrario".
+        </aside>
+      </section>
+
+      <!-- 13 · Lógicos -->
+      <section>
+        <h2>Operadores lógicos</h2>
+        <div class="cols">
+          <div class="panel"><p><code>&amp;&amp;</code> <strong>y</strong></p></div>
+          <div class="panel"><p><code>||</code> <strong>o</strong></p></div>
+        </div>
+        <div class="cols una" style="margin-top:14px">
+          <div class="panel"><p><code>!</code> <strong>no</strong></p></div>
+        </div>
+        <p class="small-text muted" style="margin-top:1.2em">Combinan condiciones booleanas. Los usaremos sobre todo a partir del Bloque 3, con las tomas de decisión (<code>if</code>).</p>
+      </section>
+
+      <!-- 14 · Lo esencial -->
+      <section>
+        <h2>Lo esencial</h2>
+        <ul>
+          <li>PHP tiene <strong>tipado dinámico</strong>: el tipo lo da el valor, y una variable puede cambiar de tipo</li>
+          <li><code>var_dump()</code> muestra el <strong>tipo y el valor</strong> exactos</li>
+          <li>Una <strong>constante</strong> (<code>define()</code> o <code>const</code>) no cambia y no lleva <code>$</code></li>
+          <li>Compara con <code class="nw">===</code> (valor <strong>y</strong> tipo), salvo razón concreta</li>
+        </ul>
+      </section>
+
+      <!-- 15 · Entorno -->
+      <section>
+        <h2>Seguimos en <code>vanilla_php</code></h2>
+        <p class="small-text">Mismo proyecto de las secciones anteriores. ¿No lo tienes levantado? Repasa <em>Preparación del entorno de trabajo</em> en 2.1.</p>
+        <pre class="medio"><code class="language-plaintext" data-trim>
+vanilla_php/
+└── public/
+    ├── RA2_holaMundo.php                 ← de 2.1
+    ├── RA2_sintaxisSalida.php            ← de 2.2
+    └── RA2_tiposVariablesOperadores.php  ← el de esta sección
+        </code></pre>
+        <p class="small-text muted">Se abre en <code>http://localhost/RA2_tiposVariablesOperadores.php</code></p>
+      </section>
+
+      <!-- 16 · Ejercicios 1-2 -->
+      <section>
+        <h2>Ejercicios (1/2)</h2>
+        <ol class="pasos compacta">
+          <li><strong>Tipos y variables.</strong> Crea <code>RA2_tiposVariablesOperadores.php</code> en <code>vanilla_php/public/</code> con el script de la diapositiva siguiente: cuatro variables mostradas con <code>echo</code> y con <code>var_dump()</code>.</li>
+          <li><strong>Constantes.</strong> Debajo, añade las dos constantes de esta sección (<code>NOMBRE_CENTRO</code> con <code>define()</code>, <code>CODIGO_CENTRO</code> con <code>const</code>) y su <code>echo</code>.</li>
+        </ol>
+      </section>
+
+      <!-- 17 · Ejercicio 1: el script -->
+      <section>
+        <h2>Ejercicio 1 · el script</h2>
+        <pre class="compacto"><code class="language-php" data-trim>
+&lt;?php
+  $codCiclo  = "DAW";     // string
+  $horas     = 2000;      // int
+  $notaCorte = 8.75;      // float
+  $activo    = true;      // bool
+
+  echo '&lt;p&gt;', $codCiclo, ' — ', $horas,
+       ' horas — nota de corte ', $notaCorte, '&lt;/p&gt;';
+
+  echo '&lt;pre&gt;';
+  var_dump($codCiclo, $horas, $notaCorte, $activo);
+  echo '&lt;/pre&gt;';
+?&gt;
+        </code></pre>
+        <aside class="notes">
+          En el REA el primer echo está en una sola línea; aquí se reparte en dos (mismo resultado) para que quepa en la diapositiva.
+          El test comprueba, sobre el HTML que devuelve el script, que aparecen string(3) "DAW", int(2000) y float(8.75).
+        </aside>
+      </section>
+
+      <!-- 18 · Ejercicios 3-4 -->
+      <section>
+        <h2>Ejercicios (2/2)</h2>
+        <ol class="pasos compacta" start="3">
+          <li><strong>Operadores.</strong> Añade, también debajo, el código de la diapositiva siguiente. <strong>Antes de ejecutarlo</strong>, anota en un comentario qué resultado esperas para cada <code>var_dump</code>; después compruébalo en el navegador.</li>
+          <li><strong>Investiga.</strong> Busca qué hace el operador <code>&lt;=&gt;</code> (<em>spaceship</em>) y con qué lo compararías de lo visto en esta sección. Escribe la respuesta en un comentario del fichero.</li>
+        </ol>
+        <aside class="notes">
+          EJERCICIO 4 (respuesta esperada). El operador &lt;=&gt; compara dos valores y devuelve un entero: -1 si el de la izquierda es menor,
+          0 si son iguales y 1 si es mayor. Se puede relacionar con los operadores de orden (&lt; &gt;) y con ==: comparte con == que compara valores
+          (convirtiendo tipos si hace falta) y no existe una versión estricta. Este operador no lo pide explícitamente el CE g: es una
+          pregunta de ampliación.
+        </aside>
+      </section>
+
+      <!-- 19 · Ejercicio 3: predice -->
+      <section>
+        <h2>Ejercicio 3 · predice el resultado</h2>
+        <pre class="medio"><code class="language-php" data-trim>
+&lt;?php
+  $horasTotales  = 2000;
+  $horasCursadas = 1350;
+  echo '&lt;p&gt;Horas restantes: ', $horasTotales - $horasCursadas, '&lt;/p&gt;';
+
+  $codCiclo = "10";   // string
+  $idCiclo  = 10;     // int
+
+  echo '&lt;pre&gt;';
+  var_dump($codCiclo == $idCiclo);    // ¿qué esperas?
+  var_dump($codCiclo === $idCiclo);   // ¿y aquí?
+  echo '&lt;/pre&gt;';
+?&gt;
+        </code></pre>
+        <p class="small-text fragment"><code>bool(true)</code> y <code>bool(false)</code>: <code>==</code> convierte tipos; <code>===</code> no.</p>
+        <aside class="notes">
+          Horas restantes: 2000 - 1350 = 650. Conviene que el alumnado anote su predicción ANTES de ejecutar, para que la sorpresa
+          del tipado dinámico se viva en el ejercicio y no solo se lea. Aquí el fragmento revela la respuesta: usadlo tras la puesta en común.
+          Ojo con el test: cuenta exactamente un bool(false) en la página; en este script sale solo el de la comparación estricta.
+        </aside>
+      </section>
+
+      <!-- 20 · Autocorrección -->
+      <section>
+        <h2>Comprueba tu solución (opcional)</h2>
+        <ol class="pasos">
+          <li>Copia <code>RA2_3_TiposVariablesOperadoresTest.php</code> a <code>vanilla_php/tests/</code></li>
+          <li>Desde la carpeta <code>laradock/</code>, ejecuta ese test:</li>
+        </ol>
+        <pre class="compacto"><code class="language-bash" data-trim>
+docker compose exec --workdir /var/www/vanilla_php workspace \
+  vendor/bin/phpunit tests/RA2_3_TiposVariablesOperadoresTest.php
+        </code></pre>
+        <p class="small-text">Cubre los ejercicios <strong>1, 2 y 3</strong>.</p>
+        <p class="small-text">Si todo está bien: <code class="nw">OK (2 tests, 9 assertions)</code></p>
+      </section>
+
+      <!-- 21 · Siguiente -->
+      <section>
+        <p class="small-text muted">Siguiente</p>
+        <h2>2.4. Ámbitos de las variables</h2>
+      </section>
+
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/reveal.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/plugin/notes.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/plugin/highlight.js"></script>
+  <script>
+    Reveal.initialize({
+      hash: true,
+      slideNumber: 'c/t',
+      transition: 'slide',
+      // Al exportar a PDF (añadir ?print-pdf a la URL): una página por diapositiva, con todos los fragmentos visibles
+      pdfSeparateFragments: false,
+      plugins: [ RevealHighlight, RevealNotes ]
+    });
+  </script>
+</body>
+</html>
