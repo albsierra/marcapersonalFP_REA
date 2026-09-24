@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>2.4. Ámbitos de las variables · marcapersonalFP v0</title>
+
+  <!--
+    reveal.js 6.0.2 cargado desde CDN con la versión fijada.
+
+    IMPORTANTE (cambio de la v5 a la v6): ya no existe la carpeta plugin/ en la raíz
+    del paquete. Todo cuelga de dist/:
+        dist/reveal.js · dist/reveal.css · dist/reset.css · dist/theme/*.css
+        dist/plugin/notes.js · dist/plugin/highlight.js · dist/plugin/highlight/monokai.css
+
+    Para trabajar SIN Internet: descarga el paquete (npm pack reveal.js@6.0.2),
+    copia su carpeta dist/ junto a este fichero y sustituye
+    "https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/" por "./reveal.js/".
+  -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/reveal.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/theme/black.css">
+  <!-- Tema del código resaltado -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/plugin/highlight/monokai.css">
+
+  <style>
+    /* ═══════════ Estilo base: el de tus presentaciones anteriores ═══════════ */
+    .reveal section img { background:none; border:none; box-shadow:none; }
+    .reveal h1, .reveal h2, .reveal h3 { color: #13DAEC; }
+    .reveal ul { list-style-type: none; }
+    .reveal ul li { margin: 10px 0; }
+    .small-text { font-size: 0.7em; }
+
+    /* Tooltips: mismo mecanismo que en las otras presentaciones.
+       Las clases .file-type / .access-type / .db-type eran idénticas y aquí se unifican en .has-tip */
+    .has-tip {
+      cursor: pointer;
+      position: relative;
+      display: inline-block;
+      padding: 5px;
+      margin: 5px 0;
+    }
+    .has-tip:hover { color: #13DAEC; }
+
+    .tooltip {
+      visibility: hidden;
+      position: absolute;
+      z-index: 1;
+      width: 400px;
+      background-color: rgba(0,0,0,0.9);
+      color: #fff;
+      text-align: left;
+      border-radius: 6px;
+      padding: 10px;
+      font-size: 0.6em;
+      font-weight: normal;
+      left: 90%;
+      top: 50%;
+      transform: translateY(-50%);
+      border: 1px solid rgba(19,218,236,0.45);   /* añadido: sobre fondo oscuro, sin borde casi no se distingue */
+    }
+    .has-tip:hover .tooltip { visibility: visible; }
+    .tooltip::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      right: 100%;
+      margin-top: -5px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: transparent rgba(0,0,0,0.9) transparent transparent;
+    }
+
+    /* Logo del centro */
+    .bg-logo {
+      position: fixed;
+      top: 10px;
+      right: 100px;
+      width: 100px;
+      height: 100px;
+      z-index: 1000;
+    }
+    /* El <text> del SVG no define fill (negro por defecto) y sobre fondo oscuro no se veía */
+    .bg-logo svg text { fill: #fff; }
+
+
+    /* ═══════════ Añadidos para esta presentación ═══════════ */
+    .muted { color: #9aa7ad; }
+
+    /* Portada */
+    .reveal h1.titulo { font-size: 1.9em; margin: 0.35em 0 0.3em; }
+
+    /* Columnas y paneles con filo de color (el color indica quién es quién) */
+    .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; text-align: left; align-items: start; }
+    .cols > * { min-width: 0; }
+    .panel { border-left: 4px solid #13DAEC; padding: 2px 0 2px 22px; }
+    .panel h3 { font-size: 0.95em; margin: 0 0 10px; }
+    .panel p { margin: 8px 0; }
+    .panel ul { margin: 0; display: block; }
+    .panel.nginx { border-color: #10B981; }   /* mismos colores que en los diagramas */
+    .panel.fpm   { border-color: #8B5CF6; }
+    .panel.client{ border-color: #3B82F6; }
+
+    /* Diagramas SVG del repositorio (llevan su propio fondo claro) */
+    .reveal img.flow { display: block; width: 880px; max-width: 100%; height: auto; margin: 6px auto 14px; }
+
+    /* Idea clave */
+    .statement { font-size: 1.3em; line-height: 1.3; text-align: left; border-left: 6px solid #13DAEC; padding: 6px 0 6px 30px; margin: 0 30px; }
+
+    /* Código */
+    .reveal :not(pre) > code { background: rgba(255,255,255,0.09); border-radius: 4px; padding: 0 0.2em; }
+    .reveal code.nw { white-space: nowrap; }          /* símbolos cortos (?>) que no deben partirse entre líneas */
+    .reveal pre { width: 100%; }
+    .reveal pre.mediano  { font-size: 0.62em; }
+    .reveal pre.compacto { font-size: 0.5em; }        /* líneas de ~70 caracteres */
+    .reveal pre.ancho    { font-size: 0.45em; }       /* línea de 75 caracteres + numeración */
+    .label { font-size: 0.6em; margin: 14px 0 6px; text-align: left; }
+
+    /* Teclas */
+    .reveal kbd {
+      font-family: var(--r-code-font); font-size: 0.8em;
+      background: #2b2b2b; border: 1px solid #555; border-bottom-width: 3px;
+      border-radius: 6px; padding: 0 0.4em;
+    }
+
+    /* Listas: ancho acotado para que el texto no llegue hasta el logo */
+    .reveal ul, .reveal ol.pasos { max-width: 860px; }
+    .reveal ol.pasos { margin: 0; display: block; text-align: left; padding-left: 1.3em; }
+    .reveal ol.pasos li { margin: 14px 0; }
+    .reveal ol.pasos.compacta { font-size: 0.88em; }
+    .cols.una { grid-template-columns: 1fr; gap: 14px; }
+
+    /* ── Reutilizado de 2.2: tabla y ventana de navegador ── */
+    .reveal pre { width: 92%; }                       /* un poco más estrecho: en ventanas 16:9 pequeñas el logo se mete en el margen */
+    .cols pre { width: 100%; }                        /* dentro de una columna, a todo el ancho de la columna */
+    .reveal pre.medio { font-size: 0.56em; }          /* código de ~55-60 caracteres por línea */
+
+    /* El párrafo que sigue al título no llega hasta la zona del logo */
+    .reveal section > h2 + p { max-width: 800px; margin-left: auto; margin-right: auto; }
+
+    /* Tabla comparativa echo / print */
+    .reveal table { margin: 0 auto; font-size: 0.72em; border-collapse: separate; border-spacing: 0; }   /* separate: las rayas de cada fila aparecen con su fragmento */
+    .reveal table th, .reveal table td { padding: 0.5em 0.9em; border-bottom: 1px solid rgba(255,255,255,0.22); vertical-align: top; }
+    .reveal table thead th { color: #13DAEC; font-size: 1.1em; border-bottom: 2px solid #13DAEC; }
+    .reveal table tbody th { color: #9aa7ad; white-space: nowrap; }
+
+    /* Ventana de navegador: mismo lenguaje visual que los diagramas del REA (panel claro con tres puntos) */
+    .browser { background: #F8FAFC; color: #1f2937; border-radius: 14px; padding: 14px 26px 20px; margin: 10px auto 18px; max-width: 860px; text-align: left; }
+    .browser .bar { display: flex; gap: 7px; margin-bottom: 10px; }
+    .browser .bar i { display: block; width: 12px; height: 12px; border-radius: 50%; }
+    .browser .bar i:nth-child(1) { background: #EF4444; }
+    .browser .bar i:nth-child(2) { background: #F59E0B; }
+    .browser .bar i:nth-child(3) { background: #10B981; }
+    .browser p { margin: 0; color: #1f2937; font-size: 0.85em; }
+  </style>
+</head>
+<body>
+
+    <div class="bg-logo">
+      <svg
+         version="1.1"
+         id="svg18"
+         width="200"
+         height="200"
+         viewBox="0 0 200 200"
+         sodipodi:docname="c3_logo"
+         inkscape:version="1.2.2 (732a01da63, 2022-12-09, custom)"
+         xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+         xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+         xmlns="http://www.w3.org/2000/svg"
+         xmlns:svg="http://www.w3.org/2000/svg">
+        <defs
+           id="defs22" />
+        <sodipodi:namedview
+           id="namedview20"
+           pagecolor="#ffffff"
+           bordercolor="#666666"
+           borderopacity="1.0"
+           inkscape:showpageshadow="2"
+           inkscape:pageopacity="0.0"
+           inkscape:pagecheckerboard="0"
+           inkscape:deskcolor="#d1d1d1"
+           showgrid="false"
+           showguides="true"
+           inkscape:zoom="4.065"
+           inkscape:cx="114.88315"
+           inkscape:cy="100"
+           inkscape:window-width="1850"
+           inkscape:window-height="1016"
+           inkscape:window-x="363"
+           inkscape:window-y="1467"
+           inkscape:window-maximized="1"
+           inkscape:current-layer="g24">
+          <sodipodi:guide
+             position="115.44994,191"
+             orientation="0,-1"
+             id="guide1222"
+             inkscape:locked="false" />
+          <sodipodi:guide
+             position="23,159.16359"
+             orientation="1,0"
+             id="guide1243"
+             inkscape:locked="false" />
+          <sodipodi:guide
+             position="117.02658,36.55078"
+             orientation="0,-1"
+             id="guide1245"
+             inkscape:locked="false" />
+        </sodipodi:namedview>
+        <g
+           inkscape:groupmode="layer"
+           inkscape:label="Image"
+           id="g24">
+          <rect
+             style="opacity:1;fill:#000000;fill-opacity:0.99702;stroke:none;stroke-width:1;stroke-dasharray:none"
+             id="rect1299"
+             width="155"
+             height="155"
+             x="23"
+             y="9" />
+          <path
+             style="fill:none"
+             d="M 23.666667,163.33333 23,162.66667 V 85.833333 9 h 46.224972 46.224968 l -7.45639,7.506491 -7.45639,7.50649 15.46932,15.49351 L 131.4758,55 116,70.5 100.5242,86 116,101.5 131.4758,117 116.2379,132.26173 101,147.52346 v 0.96475 0.96476 l 7.22497,7.27351 L 115.44994,164 H 69.891639 24.333333 Z"
+             id="path345" />
+          <g
+             id="g1241"
+             style="mix-blend-mode:normal;fill:#ffffff;fill-opacity:1;stroke:none;opacity:1"
+             transform="translate(-0.14725,0.06445)">
+            <path
+               id="rect557"
+               style="opacity:0.4;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1.31377"
+               d="m 88.718423,-32.506196 -0.0014,65.687734 H 154.40616 V 10.554121 h -43.0617 l 0.001,-43.060317 z"
+               transform="rotate(45)" />
+            <path
+               id="path1118"
+               style="opacity:0.4;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1.31377"
+               d="m 117.17383,9.5917969 -16,16.0000001 30.44922,30.447265 -14.44922,14.449219 -16,16 16,15.999999 14.44922,14.44727 -30.44922,30.44922 16,16 46.44922,-46.44922 -30.44922,-30.447269 30.44922,-30.449219 z" />
+          </g>
+          <text
+             xml:space="preserve"
+             style="font-size:22.2045px;line-height:1.25;font-family:sans-serif;stroke-width:0.925188"
+             x="25.699196"
+             y="168.92"
+             id="text1355"
+             transform="scale(0.87462907,1.1433418)"><tspan
+               sodipodi:role="line"
+               id="tspan1353"
+               x="25.699196"
+               y="168.92"
+               style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:24.6717px;font-family:'URW Gothic';-inkscape-font-specification:'URW Gothic, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.925188">CIFP CARLOS III</tspan></text>
+        </g>
+      </svg>
+    </div>
+
+  <div class="reveal">
+    <div class="slides">
+      <!-- 1 · Portada -->
+      <section>
+        <p class="small-text muted">Desarrollo Web en Entorno Servidor · Bloque 2 · RA2</p>
+        <h1 class="titulo" style="font-size:1.6em">2.4. Ámbitos<br>de las variables</h1>
+        <p class="muted">Dónde existe cada variable</p>
+        <p class="small-text muted">Seguimos con <em>marcapersonalFP</em> v0 en PHP plano</p>
+        <aside class="notes">
+          Último contenido teórico del bloque (CE h). Para explicar el ámbito hace falta la sintaxis mínima de una función,
+          que se formaliza en el Bloque 3. Tecla S: vista del ponente. Tecla O: vista general.
+        </aside>
+      </section>
+
+      <!-- 2 · Qué es el ámbito -->
+      <section>
+        <h2>Ámbito</h2>
+        <p class="statement">La parte del script donde una variable <strong>existe</strong><br>y puede usarse.</p>
+        <p class="small-text muted fragment" style="margin-top:1.4em">Hasta ahora, cada script era una única secuencia de sentencias: todo vivía en el <strong>ámbito global</strong> del fichero.</p>
+      </section>
+
+      <!-- 3 · Funciones, en avance -->
+      <section>
+        <h2>Funciones, en avance</h2>
+        <p class="small-text">Bloques de código <strong>con nombre</strong> que solo se ejecutan cuando se <strong>llaman</strong>.</p>
+        <pre class="medio"><code class="language-php" data-trim data-line-numbers="|2-4|6">
+&lt;?php
+  function saludo() {
+    echo "Hola";
+  }
+
+  saludo();   // así se llama: por su nombre, seguido de ()
+?&gt;
+        </code></pre>
+        <p class="small-text muted">Solo la sintaxis mínima para entender el ámbito. Las formalizamos (parámetros, valores de retorno…) en el Bloque 3.</p>
+      </section>
+
+      <!-- 4 · Ámbito local -->
+      <section>
+        <h2>Ámbito local</h2>
+        <p class="small-text">Una variable creada <strong>dentro</strong> de una función es <strong>local</strong>: solo existe mientras la función se ejecuta.</p>
+        <pre class="ancho"><code class="language-php" data-trim data-line-numbers="|3|7|9">
+&lt;?php
+  function mostrarCiclo() {
+    $nombreCiclo = "Desarrollo de Aplicaciones Web";
+    echo '&lt;p&gt;', $nombreCiclo, '&lt;/p&gt;';
+  }
+
+  mostrarCiclo();
+
+  // echo $nombreCiclo;   // Warning: Undefined variable $nombreCiclo
+?&gt;
+        </code></pre>
+        <p class="small-text muted">Desde fuera, nada puede verla.</p>
+        <aside class="notes">
+          Primer clic: la variable local. Segundo: la llamada. Tercero: el intento de usarla fuera (comentado; en el ejercicio 1 se descomenta).
+          En PHP 8 el aviso es un Warning; el script sigue ejecutándose.
+        </aside>
+      </section>
+
+      <!-- 5 · La función no ve lo de fuera -->
+      <section>
+        <h2>La función no ve lo de fuera</h2>
+        <p class="small-text">Distinto de otros lenguajes (JavaScript): en PHP una función <strong>no ve automáticamente</strong> las variables globales, aunque estén definidas antes de llamarla.</p>
+        <pre class="medio"><code class="language-php" data-trim data-line-numbers="|2|4-7|9">
+&lt;?php
+  $nombreCiclo = "Desarrollo de Aplicaciones Web";
+
+  function mostrarCiclo() {
+    // Warning: Undefined variable $nombreCiclo
+    echo '&lt;p&gt;', $nombreCiclo, '&lt;/p&gt;';
+  }
+
+  mostrarCiclo();
+?&gt;
+        </code></pre>
+        <p class="small-text muted">Para PHP son dos ámbitos <strong>distintos y separados</strong>.</p>
+        <aside class="notes">
+          En el REA el comentario del aviso va al final de la línea del echo; aquí se coloca encima para que quepa en la diapositiva.
+        </aside>
+      </section>
+
+      <!-- 6 · global -->
+      <section>
+        <h2><code>global</code></h2>
+        <p class="small-text">Si una función necesita leer o modificar una variable global, hay que decírselo <strong>explícitamente</strong>.</p>
+        <pre class="compacto"><code class="language-php" data-trim data-line-numbers="|2|4-7|9-11|13">
+&lt;?php
+  $totalCiclosMostrados = 0;
+
+  function registrarVisita() {
+    global $totalCiclosMostrados;
+    $totalCiclosMostrados++;
+  }
+
+  registrarVisita();
+  registrarVisita();
+  registrarVisita();
+
+  echo '&lt;p&gt;Ciclos mostrados: ', $totalCiclosMostrados, '&lt;/p&gt;';
+?&gt;
+        </code></pre>
+        <p class="small-text">Se muestra <strong>3</strong>. <code>global</code> no crea una variable nueva: <strong>enlaza</strong> el nombre local con la global del mismo nombre.</p>
+        <aside class="notes">
+          En el REA el último echo lleva al final un comentario con el resultado (// 3); aquí se comenta en la frase de debajo.
+        </aside>
+      </section>
+
+      <!-- 7 · Constantes: la excepción -->
+      <section>
+        <h2>Constantes: la excepción</h2>
+        <p class="small-text">Las constantes de 2.3 <strong>no</strong> siguen estas reglas: son accesibles en cualquier función, <strong>sin <code>global</code></strong>.</p>
+        <pre class="ancho"><code class="language-php" data-trim data-line-numbers="|2|4-7|9">
+&lt;?php
+  define('NOMBRE_CENTRO', 'CIFP Carlos III');
+
+  function pie() {
+    // Sin "global": las constantes son accesibles en cualquier ámbito
+    echo '&lt;footer&gt;', NOMBRE_CENTRO, '&lt;/footer&gt;';
+  }
+
+  pie();
+?&gt;
+        </code></pre>
+        <p class="small-text muted">Por eso son útiles para valores fijos de configuración: el nombre del centro, una clave de API…</p>
+      </section>
+
+      <!-- 8 · Superglobales -->
+      <section>
+        <h2>Variables superglobales</h2>
+        <p class="small-text">PHP trae variables propias que comparten la propiedad de las constantes: disponibles en <strong>cualquier ámbito</strong>, sin <code>global</code>.</p>
+        <div class="cols">
+          <div class="panel"><p><code>$_GET</code> · <code>$_POST</code></p></div>
+          <div class="panel"><p><code>$_SERVER</code> · <code>$_SESSION</code></p></div>
+        </div>
+        <p class="small-text muted" style="margin-top:1.2em">Las usaremos con detalle en formularios (Bloque 3) y sesiones (Bloque 4).</p>
+      </section>
+
+      <!-- 9 · static -->
+      <section>
+        <h2>Variables estáticas</h2>
+        <p class="small-text">Las locales se destruyen al terminar la función y se recrean —vacías— en la siguiente llamada. <code>static</code> hace que una variable <strong>conserve su valor</strong> entre llamadas.</p>
+        <pre class="compacto"><code class="language-php" data-trim data-line-numbers="|2-6|8|9|10">
+&lt;?php
+  function contadorVisitas() {
+    static $visitas = 0;
+    $visitas++;
+    echo '&lt;p&gt;Visita número ', $visitas, '&lt;/p&gt;';
+  }
+
+  contadorVisitas();   // Visita número 1
+  contadorVisitas();   // Visita número 2
+  contadorVisitas();   // Visita número 3
+?&gt;
+        </code></pre>
+        <p class="small-text muted">Sin <code>static</code>, <code>$visitas</code> valdría <code>0</code> al inicio de cada llamada y nunca pasaría de «Visita número 1».</p>
+        <aside class="notes">
+          Los clics recorren: la función, la primera llamada, la segunda y la tercera.
+        </aside>
+      </section>
+
+      <!-- 10 · Ojo con "entre llamadas" -->
+      <section>
+        <h2>Ojo con «entre llamadas»</h2>
+        <div class="cols">
+          <div class="panel">
+            <h3>Una misma ejecución</h3>
+            <p>Las tres llamadas a <code>contadorVisitas()</code> muestran <strong>1, 2 y 3</strong>.</p>
+          </div>
+          <div class="panel fragment" style="border-color:#EF4444">
+            <h3>Recargas la página</h3>
+            <p>Petición HTTP <strong>nueva</strong>: el contador vuelve a empezar por <strong>1</strong>.</p>
+          </div>
+        </div>
+        <p class="statement fragment" style="font-size:0.95em; margin-top:1.4em">Cada petición ejecuta el script <strong>desde cero</strong>. Al terminar la respuesta no queda memoria de nada, tampoco de las variables <code>static</code>.</p>
+        <p class="small-text muted fragment">Para conservar datos entre peticiones hacen falta mecanismos de estado explícitos: sesiones, cookies o una base de datos (bloques posteriores).</p>
+        <aside class="notes">
+          Enlaza con el flujo petición-respuesta de 2.1: el servidor ejecuta el script para cada petición.
+          Es el motivo del ejercicio 4: recargar varias veces y explicar por qué el contador no sigue por el 4, el 5…
+        </aside>
+      </section>
+
+      <!-- 11 · Lo esencial -->
+      <section>
+        <h2>Lo esencial</h2>
+        <ul>
+          <li>Una variable <strong>local</strong> solo existe dentro de su función</li>
+          <li>Una función <strong>no ve</strong> las variables globales, salvo que uses <code>global</code></li>
+          <li>Las <strong>constantes</strong> y las <strong>superglobales</strong> se ven en cualquier ámbito</li>
+          <li><code>static</code> conserva el valor entre llamadas… <strong>solo dentro de una misma petición</strong></li>
+        </ul>
+      </section>
+
+      <!-- 12 · Entorno -->
+      <section>
+        <h2>Seguimos en <code>vanilla_php</code></h2>
+        <p class="small-text">Mismo proyecto de las secciones anteriores. ¿No lo tienes levantado? Repasa <em>Preparación del entorno de trabajo</em> en 2.1.</p>
+        <pre class="medio"><code class="language-plaintext" data-trim>
+vanilla_php/
+└── public/
+    ├── RA2_holaMundo.php                 ← de 2.1
+    ├── RA2_sintaxisSalida.php            ← de 2.2
+    ├── RA2_tiposVariablesOperadores.php  ← de 2.3
+    └── RA2_ambitos.php                   ← el de esta sección
+        </code></pre>
+        <p class="small-text muted">Se abre en <code>http://localhost/RA2_ambitos.php</code></p>
+      </section>
+
+      <!-- 13 · Ejercicios 1-2 -->
+      <section>
+        <h2>Ejercicios (1/3)</h2>
+        <ol class="pasos compacta">
+          <li><strong>Ámbito local.</strong> Crea <code>RA2_ambitos.php</code> en <code>vanilla_php/public/</code> con la función <code>mostrarCiclo()</code> y su llamada. Después descomenta <code>echo $nombreCiclo;</code> fuera de la función, recarga y observa el aviso (<code>Undefined variable</code>). Explica en un comentario por qué ocurre y <strong>vuelve a comentar la línea</strong> al terminar.</li>
+          <li><strong>Ámbito global con <code>global</code>.</strong> Debajo, añade <code>$totalCiclosMostrados</code>, <code>registrarVisita()</code> y las tres llamadas, terminando con el <code>echo</code> del total.</li>
+        </ol>
+      </section>
+
+      <!-- 14 · Ejercicios 3-4 -->
+      <section>
+        <h2>Ejercicios (2/3)</h2>
+        <ol class="pasos compacta" start="3">
+          <li><strong>Constantes y ámbito.</strong> Añade la constante <code>NOMBRE_CENTRO</code> y la función <code>pie()</code>, y llama a <code>pie()</code>.</li>
+          <li><strong>Variables estáticas.</strong> Añade <code>contadorVisitas()</code> y llámala tres veces seguidas. Comprueba el resultado y <strong>recarga la página varias veces</strong>: ¿por qué el contador vuelve a empezar por 1 en cada recarga en vez de seguir por el 4, el 5…?</li>
+        </ol>
+        <aside class="notes">
+          EJERCICIO 4. Cada recarga es una petición nueva y el script se ejecuta desde cero: ni las variables normales ni las static sobreviven a la respuesta.
+        </aside>
+      </section>
+
+      <!-- 15 · Ejercicio 5 -->
+      <section>
+        <h2>Ejercicios (3/3)</h2>
+        <ol class="pasos compacta" start="5">
+          <li><strong>Investiga.</strong> ¿Qué son las variables <strong>superglobales</strong> de PHP? Cita al menos dos y explica, en un comentario, en qué se parece su ámbito al de las constantes.</li>
+        </ol>
+        <aside class="notes">
+          EJERCICIO 5 (respuesta esperada). Las superglobales son variables predefinidas disponibles en todos los ámbitos sin usar global:
+          $GLOBALS, $_SERVER, $_GET, $_POST, $_FILES, $_COOKIE, $_SESSION, $_REQUEST y $_ENV. Se parecen a las constantes en que se pueden usar
+          dentro de cualquier función sin declararlas antes.
+        </aside>
+      </section>
+
+      <!-- 16 · Autocorrección -->
+      <section>
+        <h2>Comprueba tu solución (opcional)</h2>
+        <ol class="pasos">
+          <li>Copia <code>RA2_4_AmbitosTest.php</code> a <code>vanilla_php/tests/</code></li>
+          <li>Desde la carpeta <code>laradock/</code>, ejecuta ese test:</li>
+        </ol>
+        <pre class="compacto"><code class="language-bash" data-trim>
+docker compose exec --workdir /var/www/vanilla_php workspace \
+  vendor/bin/phpunit tests/RA2_4_AmbitosTest.php
+        </code></pre>
+        <p class="small-text">Cubre los ejercicios <strong>1 a 4</strong>.</p>
+        <p class="small-text">Si todo está bien: <code class="nw">OK (2 tests, 6 assertions)</code></p>
+        <aside class="notes">
+          Las aserciones están pensadas para fallar justo si falta la palabra clave que se enseña: sin global, la variable no llega a 3;
+          sin static, el contador nunca llega a «Visita número 3».
+        </aside>
+      </section>
+
+      <!-- 17 · Siguiente -->
+      <section>
+        <p class="small-text muted">Siguiente</p>
+        <h2>2.5. Proyecto: listado de currículos desde un array</h2>
+      </section>
+
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/reveal.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/plugin/notes.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/plugin/highlight.js"></script>
+  <script>
+    Reveal.initialize({
+      hash: true,
+      slideNumber: 'c/t',
+      transition: 'slide',
+      // Al exportar a PDF (añadir ?print-pdf a la URL): una página por diapositiva, con todos los fragmentos visibles
+      pdfSeparateFragments: false,
+      plugins: [ RevealHighlight, RevealNotes ]
+    });
+  </script>
+</body>
+</html>

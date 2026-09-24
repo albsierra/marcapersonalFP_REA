@@ -1,5 +1,7 @@
 # 2.4. Ámbitos de las variables
 
+**Presentación de apoyo** (_RevealJS_): [RA2_4_ambitos_slides.html](./materiales/slides/RA2_4_ambitos_slides.html)
+
 ## Qué es el ámbito de una variable
 
 El **ámbito** (_scope_) de una variable es la parte del script donde esa variable existe y puede usarse. Hasta ahora no le hemos prestado atención porque todos nuestros scripts han sido una única secuencia de sentencias: toda variable que creábamos vivía en el **ámbito global** del fichero y era accesible en cualquier línea posterior.
