@@ -1,5 +1,7 @@
 # 2.5. Proyecto: listado de currículos desde un array
 
+**Presentación de apoyo** (_RevealJS_): [RA2_5_proyectoListado_slides.html](./materiales/slides/RA2_5_proyectoListado_slides.html)
+
 Cerramos el Bloque 2 con un pequeño proyecto que integra lo visto hasta ahora —salida con `echo`, tipos y constantes, funciones y ámbito— en una primera pieza real de _marcapersonalFP v0_: una página que lista los currículos de varios alumnos.
 
 ## Antes de nada: arrays, en avance

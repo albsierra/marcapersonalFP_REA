@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>2.5. Proyecto: listado de currículos desde un array · marcapersonalFP v0</title>
+
+  <!--
+    reveal.js 6.0.2 cargado desde CDN con la versión fijada.
+
+    IMPORTANTE (cambio de la v5 a la v6): ya no existe la carpeta plugin/ en la raíz
+    del paquete. Todo cuelga de dist/:
+        dist/reveal.js · dist/reveal.css · dist/reset.css · dist/theme/*.css
+        dist/plugin/notes.js · dist/plugin/highlight.js · dist/plugin/highlight/monokai.css
+
+    Para trabajar SIN Internet: descarga el paquete (npm pack reveal.js@6.0.2),
+    copia su carpeta dist/ junto a este fichero y sustituye
+    "https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/" por "./reveal.js/".
+  -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/reveal.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/theme/black.css">
+  <!-- Tema del código resaltado -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/plugin/highlight/monokai.css">
+
+  <style>
+    /* ═══════════ Estilo base: el de tus presentaciones anteriores ═══════════ */
+    .reveal section img { background:none; border:none; box-shadow:none; }
+    .reveal h1, .reveal h2, .reveal h3 { color: #13DAEC; }
+    .reveal ul { list-style-type: none; }
+    .reveal ul li { margin: 10px 0; }
+    .small-text { font-size: 0.7em; }
+
+    /* Tooltips: mismo mecanismo que en las otras presentaciones.
+       Las clases .file-type / .access-type / .db-type eran idénticas y aquí se unifican en .has-tip */
+    .has-tip {
+      cursor: pointer;
+      position: relative;
+      display: inline-block;
+      padding: 5px;
+      margin: 5px 0;
+    }
+    .has-tip:hover { color: #13DAEC; }
+
+    .tooltip {
+      visibility: hidden;
+      position: absolute;
+      z-index: 1;
+      width: 400px;
+      background-color: rgba(0,0,0,0.9);
+      color: #fff;
+      text-align: left;
+      border-radius: 6px;
+      padding: 10px;
+      font-size: 0.6em;
+      font-weight: normal;
+      left: 90%;
+      top: 50%;
+      transform: translateY(-50%);
+      border: 1px solid rgba(19,218,236,0.45);   /* añadido: sobre fondo oscuro, sin borde casi no se distingue */
+    }
+    .has-tip:hover .tooltip { visibility: visible; }
+    .tooltip::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      right: 100%;
+      margin-top: -5px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: transparent rgba(0,0,0,0.9) transparent transparent;
+    }
+
+    /* Logo del centro */
+    .bg-logo {
+      position: fixed;
+      top: 10px;
+      right: 100px;
+      width: 100px;
+      height: 100px;
+      z-index: 1000;
+    }
+    /* El <text> del SVG no define fill (negro por defecto) y sobre fondo oscuro no se veía */
+    .bg-logo svg text { fill: #fff; }
+
+
+    /* ═══════════ Añadidos para esta presentación ═══════════ */
+    .muted { color: #9aa7ad; }
+
+    /* Portada */
+    .reveal h1.titulo { font-size: 1.9em; margin: 0.35em 0 0.3em; }
+
+    /* Columnas y paneles con filo de color (el color indica quién es quién) */
+    .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; text-align: left; align-items: start; }
+    .cols > * { min-width: 0; }
+    .panel { border-left: 4px solid #13DAEC; padding: 2px 0 2px 22px; }
+    .panel h3 { font-size: 0.95em; margin: 0 0 10px; }
+    .panel p { margin: 8px 0; }
+    .panel ul { margin: 0; display: block; }
+    .panel.nginx { border-color: #10B981; }   /* mismos colores que en los diagramas */
+    .panel.fpm   { border-color: #8B5CF6; }
+    .panel.client{ border-color: #3B82F6; }
+
+    /* Diagramas SVG del repositorio (llevan su propio fondo claro) */
+    .reveal img.flow { display: block; width: 880px; max-width: 100%; height: auto; margin: 6px auto 14px; }
+
+    /* Idea clave */
+    .statement { font-size: 1.3em; line-height: 1.3; text-align: left; border-left: 6px solid #13DAEC; padding: 6px 0 6px 30px; margin: 0 30px; }
+
+    /* Código */
+    .reveal :not(pre) > code { background: rgba(255,255,255,0.09); border-radius: 4px; padding: 0 0.2em; }
+    .reveal code.nw { white-space: nowrap; }          /* símbolos cortos (?>) que no deben partirse entre líneas */
+    .reveal pre { width: 100%; }
+    .reveal pre.mediano  { font-size: 0.62em; }
+    .reveal pre.compacto { font-size: 0.5em; }        /* líneas de ~70 caracteres */
+    .reveal pre.ancho    { font-size: 0.45em; }       /* línea de 75 caracteres + numeración */
+    .label { font-size: 0.6em; margin: 14px 0 6px; text-align: left; }
+
+    /* Teclas */
+    .reveal kbd {
+      font-family: var(--r-code-font); font-size: 0.8em;
+      background: #2b2b2b; border: 1px solid #555; border-bottom-width: 3px;
+      border-radius: 6px; padding: 0 0.4em;
+    }
+
+    /* Listas: ancho acotado para que el texto no llegue hasta el logo */
+    .reveal ul, .reveal ol.pasos { max-width: 860px; }
+    .reveal ol.pasos { margin: 0; display: block; text-align: left; padding-left: 1.3em; }
+    .reveal ol.pasos li { margin: 14px 0; }
+    .reveal ol.pasos.compacta { font-size: 0.88em; }
+    .cols.una { grid-template-columns: 1fr; gap: 14px; }
+
+    /* ── Reutilizado de 2.2: tabla y ventana de navegador ── */
+    .reveal pre { width: 92%; }                       /* un poco más estrecho: en ventanas 16:9 pequeñas el logo se mete en el margen */
+    .cols pre { width: 100%; }                        /* dentro de una columna, a todo el ancho de la columna */
+    .reveal pre.medio { font-size: 0.56em; }          /* código de ~55-60 caracteres por línea */
+
+    /* El párrafo que sigue al título no llega hasta la zona del logo */
+    .reveal section > h2 + p { max-width: 800px; margin-left: auto; margin-right: auto; }
+
+    /* Tabla comparativa echo / print */
+    .reveal table { margin: 0 auto; font-size: 0.72em; border-collapse: separate; border-spacing: 0; }   /* separate: las rayas de cada fila aparecen con su fragmento */
+    .reveal table th, .reveal table td { padding: 0.5em 0.9em; border-bottom: 1px solid rgba(255,255,255,0.22); vertical-align: top; }
+    .reveal table thead th { color: #13DAEC; font-size: 1.1em; border-bottom: 2px solid #13DAEC; }
+    .reveal table tbody th { color: #9aa7ad; white-space: nowrap; }
+
+    /* Ventana de navegador: mismo lenguaje visual que los diagramas del REA (panel claro con tres puntos) */
+    .browser { background: #F8FAFC; color: #1f2937; border-radius: 14px; padding: 14px 26px 20px; margin: 10px auto 18px; max-width: 860px; text-align: left; }
+    .browser .bar { display: flex; gap: 7px; margin-bottom: 10px; }
+    .browser .bar i { display: block; width: 12px; height: 12px; border-radius: 50%; }
+    .browser .bar i:nth-child(1) { background: #EF4444; }
+    .browser .bar i:nth-child(2) { background: #F59E0B; }
+    .browser .bar i:nth-child(3) { background: #10B981; }
+    .browser p { margin: 0; color: #1f2937; font-size: 0.85em; }
+
+    /* ── Solo en 2.5: lista y título dentro de la ventana de navegador ── */
+    .browser h1 { font-size: 1em; margin: 0 0 0.4em; color: #1f2937; text-transform: none; }
+    .browser ul { list-style: disc; margin: 0 0 0 1.2em; display: block; }
+    .browser li { margin: 4px 0; font-size: 0.85em; }
+    .browser a { color: #2563EB; }
+  </style>
+</head>
+<body>
+
+    <div class="bg-logo">
+      <svg
+         version="1.1"
+         id="svg18"
+         width="200"
+         height="200"
+         viewBox="0 0 200 200"
+         sodipodi:docname="c3_logo"
+         inkscape:version="1.2.2 (732a01da63, 2022-12-09, custom)"
+         xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+         xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+         xmlns="http://www.w3.org/2000/svg"
+         xmlns:svg="http://www.w3.org/2000/svg">
+        <defs
+           id="defs22" />
+        <sodipodi:namedview
+           id="namedview20"
+           pagecolor="#ffffff"
+           bordercolor="#666666"
+           borderopacity="1.0"
+           inkscape:showpageshadow="2"
+           inkscape:pageopacity="0.0"
+           inkscape:pagecheckerboard="0"
+           inkscape:deskcolor="#d1d1d1"
+           showgrid="false"
+           showguides="true"
+           inkscape:zoom="4.065"
+           inkscape:cx="114.88315"
+           inkscape:cy="100"
+           inkscape:window-width="1850"
+           inkscape:window-height="1016"
+           inkscape:window-x="363"
+           inkscape:window-y="1467"
+           inkscape:window-maximized="1"
+           inkscape:current-layer="g24">
+          <sodipodi:guide
+             position="115.44994,191"
+             orientation="0,-1"
+             id="guide1222"
+             inkscape:locked="false" />
+          <sodipodi:guide
+             position="23,159.16359"
+             orientation="1,0"
+             id="guide1243"
+             inkscape:locked="false" />
+          <sodipodi:guide
+             position="117.02658,36.55078"
+             orientation="0,-1"
+             id="guide1245"
+             inkscape:locked="false" />
+        </sodipodi:namedview>
+        <g
+           inkscape:groupmode="layer"
+           inkscape:label="Image"
+           id="g24">
+          <rect
+             style="opacity:1;fill:#000000;fill-opacity:0.99702;stroke:none;stroke-width:1;stroke-dasharray:none"
+             id="rect1299"
+             width="155"
+             height="155"
+             x="23"
+             y="9" />
+          <path
+             style="fill:none"
+             d="M 23.666667,163.33333 23,162.66667 V 85.833333 9 h 46.224972 46.224968 l -7.45639,7.506491 -7.45639,7.50649 15.46932,15.49351 L 131.4758,55 116,70.5 100.5242,86 116,101.5 131.4758,117 116.2379,132.26173 101,147.52346 v 0.96475 0.96476 l 7.22497,7.27351 L 115.44994,164 H 69.891639 24.333333 Z"
+             id="path345" />
+          <g
+             id="g1241"
+             style="mix-blend-mode:normal;fill:#ffffff;fill-opacity:1;stroke:none;opacity:1"
+             transform="translate(-0.14725,0.06445)">
+            <path
+               id="rect557"
+               style="opacity:0.4;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1.31377"
+               d="m 88.718423,-32.506196 -0.0014,65.687734 H 154.40616 V 10.554121 h -43.0617 l 0.001,-43.060317 z"
+               transform="rotate(45)" />
+            <path
+               id="path1118"
+               style="opacity:0.4;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1.31377"
+               d="m 117.17383,9.5917969 -16,16.0000001 30.44922,30.447265 -14.44922,14.449219 -16,16 16,15.999999 14.44922,14.44727 -30.44922,30.44922 16,16 46.44922,-46.44922 -30.44922,-30.447269 30.44922,-30.449219 z" />
+          </g>
+          <text
+             xml:space="preserve"
+             style="font-size:22.2045px;line-height:1.25;font-family:sans-serif;stroke-width:0.925188"
+             x="25.699196"
+             y="168.92"
+             id="text1355"
+             transform="scale(0.87462907,1.1433418)"><tspan
+               sodipodi:role="line"
+               id="tspan1353"
+               x="25.699196"
+               y="168.92"
+               style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:24.6717px;font-family:'URW Gothic';-inkscape-font-specification:'URW Gothic, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.925188">CIFP CARLOS III</tspan></text>
+        </g>
+      </svg>
+    </div>
+
+  <div class="reveal">
+    <div class="slides">
+      <!-- 1 · Portada -->
+      <section>
+        <p class="small-text muted">Desarrollo Web en Entorno Servidor · Bloque 2 · RA2</p>
+        <h1 class="titulo" style="font-size:1.6em">2.5. Proyecto:<br>listado de currículos</h1>
+        <p class="muted">Cierre del Bloque 2 · desde un array</p>
+        <p class="small-text muted">Una primera pieza real de <em>marcapersonalFP</em> v0</p>
+        <aside class="notes">
+          Proyecto acumulativo: integra echo, tipos y constantes, funciones y ámbito de las secciones anteriores,
+          y adelanta lo mínimo de arrays (se formalizan en el Bloque 3, CE c). Tecla S: vista del ponente. Tecla O: vista general.
+        </aside>
+      </section>
+
+      <!-- 2 · Lo que vamos a construir -->
+      <section>
+        <h2>Lo que vamos a construir</h2>
+        <div class="browser">
+          <div class="bar"><i></i><i></i><i></i></div>
+          <h1>CIFP Carlos III — Currículos</h1>
+          <ul>
+            <li>Ana López — DAW — <a href="#">vídeo</a></li>
+            <li>Marcos Pérez — DAM — <a href="#">vídeo</a></li>
+            <li>Laura García — ASIR — <a href="#">vídeo</a></li>
+          </ul>
+        </div>
+        <p class="small-text muted">Una página que lista los currículos de varios alumnos, a partir de datos guardados en un <strong>array</strong>.</p>
+      </section>
+
+      <!-- 3 · Arrays, en avance -->
+      <section>
+        <h2>Arrays, en avance</h2>
+        <p class="statement" style="font-size:1.1em">Una variable que contiene<br>una <strong>colección de valores</strong>.</p>
+        <p class="small-text muted" style="margin-top:1.3em">Los formalizamos —bucles, arrays multidimensionales, funciones de array…— en el Bloque 3 (CE c). Aquí, solo lo mínimo para guardar y leer datos.</p>
+      </section>
+
+      <!-- 4 · Array indexado -->
+      <section>
+        <h2>Array indexado</h2>
+        <p class="small-text">Valores <strong>en orden</strong>, accesibles por posición (empezando en <code>0</code>).</p>
+        <pre class="medio"><code class="language-php" data-trim data-line-numbers="|2|3|4">
+&lt;?php
+  $ciclos = ['DAW', 'DAM', 'ASIR'];
+  echo $ciclos[0];       // DAW
+  echo count($ciclos);   // 3
+?&gt;
+        </code></pre>
+        <p class="small-text muted"><code>count()</code> devuelve cuántos elementos tiene el array.</p>
+      </section>
+
+      <!-- 5 · Array asociativo -->
+      <section>
+        <h2>Array asociativo</h2>
+        <p class="small-text">Claves <strong>con nombre</strong> en vez de posiciones: ideal para agrupar los datos de un mismo currículo.</p>
+        <pre class="medio"><code class="language-php" data-trim data-line-numbers="|2|3">
+&lt;?php
+  $curriculo = ['alumno' =&gt; 'Ana López', 'ciclo' =&gt; 'DAW'];
+  echo $curriculo['alumno'];   // Ana López
+?&gt;
+        </code></pre>
+      </section>
+
+      <!-- 6 · Array de arrays -->
+      <section>
+        <h2>Una lista de currículos</h2>
+        <p class="small-text">Un array indexado <strong>de</strong> arrays asociativos: una lista, cada elemento con sus propios campos.</p>
+        <pre class="medio"><code class="language-php" data-trim data-line-numbers="|2-3|4-5|6-7|9">
+&lt;?php
+  $curriculos = [
+    ['alumno' =&gt; 'Ana López',    'ciclo' =&gt; 'DAW',
+     'video'  =&gt; 'https://youtu.be/curriculo1'],
+    ['alumno' =&gt; 'Marcos Pérez', 'ciclo' =&gt; 'DAM',
+     'video'  =&gt; 'https://youtu.be/curriculo2'],
+    ['alumno' =&gt; 'Laura García', 'ciclo' =&gt; 'ASIR',
+     'video'  =&gt; 'https://youtu.be/curriculo3'],
+  ];
+
+  echo $curriculos[0]['alumno'];   // Ana López
+?&gt;
+        </code></pre>
+        <aside class="notes">
+          En el REA cada currículo va en una sola línea; aquí se reparte en dos para que quepa en la diapositiva (mismo array).
+          Los enlaces de vídeo son de ejemplo. El último echo: primero la posición ([0]), luego la clave (['alumno']).
+        </aside>
+      </section>
+
+      <!-- 7 · La función mostrarCurriculo -->
+      <section>
+        <h2>La función <code>mostrarCurriculo()</code></h2>
+        <p class="small-text">Con una función —recuerda 2.4— evitamos repetir el mismo <code>echo</code> con distintos campos.</p>
+        <pre class="compacto"><code class="language-php" data-trim data-line-numbers="|2|3-4">
+&lt;?php
+  function mostrarCurriculo(array $curriculo) {
+    echo '&lt;li&gt;', $curriculo['alumno'], ' — ', $curriculo['ciclo'],
+         ' — &lt;a href="', $curriculo['video'], '"&gt;vídeo&lt;/a&gt;&lt;/li&gt;';
+  }
+?&gt;
+        </code></pre>
+        <p class="small-text muted">Recibe un currículo (un array asociativo) y emite su <code>&lt;li&gt;</code>.</p>
+      </section>
+
+      <!-- 8 · Tipo declarado en un parámetro -->
+      <section>
+        <h2><code>array $curriculo</code></h2>
+        <p class="statement" style="font-size:1.05em">Un <strong>tipo declarado</strong> en un parámetro de función.</p>
+        <ul class="small-text" style="margin-top:1.2em">
+          <li class="fragment">Sí existe en PHP… a diferencia de las variables sueltas, que <strong>no</strong> se pueden tipar (2.3)</li>
+          <li class="fragment">Dice a PHP —y a quien lea la función— que espera recibir un array</li>
+          <li class="fragment">Si le pasas otra cosa, PHP avisa con un error</li>
+        </ul>
+        <p class="small-text muted fragment">Lo retomaremos con más tipos (<code>string</code>, <code>int</code>…) en el Bloque 3.</p>
+      </section>
+
+      <!-- 9 · Montamos la página -->
+      <section>
+        <h2>Montamos la página</h2>
+        <p class="small-text">Una llamada a la función por cada currículo:</p>
+        <pre class="medio"><code class="language-php" data-trim data-line-numbers="|2|3|4-6|7">
+&lt;?php
+  echo '&lt;h1&gt;', NOMBRE_CENTRO, ' — Currículos&lt;/h1&gt;';
+  echo '&lt;ul&gt;';
+  mostrarCurriculo($curriculos[0]);
+  mostrarCurriculo($curriculos[1]);
+  mostrarCurriculo($curriculos[2]);
+  echo '&lt;/ul&gt;';
+?&gt;
+        </code></pre>
+        <p class="small-text muted"><code>NOMBRE_CENTRO</code> es la constante de 2.3 y 2.4, con el valor <code>'CIFP Carlos III'</code>.</p>
+      </section>
+
+      <!-- 10 · ¿Y con 100 currículos? -->
+      <section>
+        <h2>¿Y con 100 currículos?</h2>
+        <p class="statement" style="font-size:1.1em">Con 3, repetir la llamada a mano es asumible.<br>Con 100, sería <strong>absurdo</strong>.</p>
+        <p class="small-text muted fragment" style="margin-top:1.4em">Los <strong>bucles</strong> del Bloque 3 lo resuelven: recorren un array sin repetir el código.</p>
+        <aside class="notes">
+          Gancho hacia el Bloque 3. No se enseña foreach aquí: el ejercicio 4 invita, de forma opcional, a que lo investiguen por su cuenta.
+        </aside>
+      </section>
+
+      <!-- 11 · Lo esencial -->
+      <section>
+        <h2>Lo esencial</h2>
+        <ul>
+          <li>Un <strong>array</strong> guarda varios valores bajo un solo nombre</li>
+          <li><strong>Indexado</strong>: por posición · <strong>asociativo</strong>: por clave con nombre</li>
+          <li>Una <strong>función</strong> evita repetir la sentencia <code>echo</code> por cada elemento</li>
+          <li>Los parámetros de una función <strong>sí</strong> pueden llevar tipo declarado</li>
+        </ul>
+      </section>
+
+      <!-- 12 · Entorno -->
+      <section>
+        <h2>Seguimos en <code>vanilla_php</code></h2>
+        <p class="small-text">Mismo proyecto de las secciones anteriores. ¿No lo tienes levantado? Repasa <em>Preparación del entorno de trabajo</em> en 2.1.</p>
+        <pre class="medio"><code class="language-plaintext" data-trim>
+vanilla_php/
+└── public/
+    ├── …                          ← de 2.1 a 2.4
+    └── RA2_proyectoListado.php    ← el de esta sección
+        </code></pre>
+        <p class="small-text muted">Se abre en <code>http://localhost/RA2_proyectoListado.php</code></p>
+      </section>
+
+      <!-- 13 · Ejercicios 1-3 -->
+      <section>
+        <h2>Ejercicios (1/2)</h2>
+        <ol class="pasos compacta">
+          <li><strong>El array de currículos.</strong> Crea <code>RA2_proyectoListado.php</code> en <code>vanilla_php/public/</code> con la constante <code>NOMBRE_CENTRO</code> (<code>'CIFP Carlos III'</code>) y el array <code>$curriculos</code> de esta sección, con sus tres currículos.</li>
+          <li><strong>La función <code>mostrarCurriculo()</code>.</strong> Añade la función de esta sección.</li>
+          <li><strong>El listado.</strong> Añade el bloque <code>&lt;h1&gt;</code>/<code>&lt;ul&gt;</code>/llamadas y compruébalo en el navegador.</li>
+        </ol>
+      </section>
+
+      <!-- 14 · Ejercicio 4 -->
+      <section>
+        <h2>Ejercicios (2/2)</h2>
+        <ol class="pasos compacta" start="4">
+          <li><strong>Investiga</strong> <span class="muted">(opcional, sin test)</span>. Busca en la documentación de PHP qué hace un bucle <code>foreach</code> y, si te animas, reescribe el ejercicio 3 con un <code>foreach</code> en vez de las tres llamadas sueltas. No hace falta que te salga perfecto: lo veremos formalmente en el Bloque 3. Esto es solo para abrir boca.</li>
+        </ol>
+      </section>
+
+      <!-- 15 · Autocorrección -->
+      <section>
+        <h2>Comprueba tu solución (opcional)</h2>
+        <ol class="pasos">
+          <li>Copia <code>RA2_5_ProyectoListadoTest.php</code> a <code>vanilla_php/tests/</code></li>
+          <li>Desde la carpeta <code>laradock/</code>, ejecuta ese test:</li>
+        </ol>
+        <pre class="compacto"><code class="language-bash" data-trim>
+docker compose exec --workdir /var/www/vanilla_php workspace \
+  vendor/bin/phpunit tests/RA2_5_ProyectoListadoTest.php
+        </code></pre>
+        <p class="small-text">Cubre los ejercicios <strong>1 a 3</strong>.</p>
+        <p class="small-text">Si todo está bien: <code class="nw">OK (2 tests, 7 assertions)</code></p>
+      </section>
+
+      <!-- 16 · Todos los tests del bloque -->
+      <section>
+        <h2>Todos los tests del Bloque 2</h2>
+        <p class="small-text">Si has ido copiando el test de cada apartado a <code>vanilla_php/tests/</code>, ya tienes los cinco. Ahora sí: <code>phpunit</code> <strong>sin indicar fichero</strong>.</p>
+        <pre class="compacto"><code class="language-bash" data-trim>
+docker compose exec --workdir /var/www/vanilla_php workspace \
+  vendor/bin/phpunit
+        </code></pre>
+        <p class="small-text">Si todo el bloque está resuelto: <code class="nw">OK (10 tests, 32 assertions)</code></p>
+        <aside class="notes">
+          Suma de los cinco ficheros: 2.1 → 2 tests y 4 aserciones; 2.2 → 2 y 6; 2.3 → 2 y 9; 2.4 → 2 y 6; 2.5 → 2 y 7. Total: 10 tests y 32 aserciones.
+        </aside>
+      </section>
+
+      <!-- 17 · Siguiente -->
+      <section>
+        <p class="small-text muted">Siguiente</p>
+        <h2>Bloque 3 · Programación basada en lenguajes de marcas con código embebido (RA3)</h2>
+      </section>
+
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/reveal.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/plugin/notes.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@6.0.2/dist/plugin/highlight.js"></script>
+  <script>
+    Reveal.initialize({
+      hash: true,
+      slideNumber: 'c/t',
+      transition: 'slide',
+      // Al exportar a PDF (añadir ?print-pdf a la URL): una página por diapositiva, con todos los fragmentos visibles
+      pdfSeparateFragments: false,
+      plugins: [ RevealHighlight, RevealNotes ]
+    });
+  </script>
+</body>
+</html>
